@@ -3,11 +3,13 @@
 using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.Azure.EventHubs.Processor;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService
 {
@@ -69,6 +71,13 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService
 
             // Auth and CORS setup
             Auth.Startup.SetupDependencies(builder, config);
+
+            IEventProcessorFactory eventProcessorFactory = new NotificationEventProcessorFactory(logger);
+            builder.RegisterInstance(eventProcessorFactory).As<IEventProcessorFactory>().SingleInstance();
+
+            // NotificationSystemAgent
+            var notificationSystemAgent = new Agent(logger, config.ServicesConfig, eventProcessorFactory);
+            builder.RegisterInstance(notificationSystemAgent).As<IAgent>().SingleInstance();
 
             // By default Autofac uses a request lifetime, creating new objects
             // for each request, which is good to reduce the risk of memory
