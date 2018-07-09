@@ -16,6 +16,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
 
         // Client authentication and authorization configuration
         IClientAuthConfig ClientAuthConfig { get; }
+
+        IBlobStorageConfig blobStorageConfig { get;  }
     }
 
     /// <summary>Web service configuration</summary>
@@ -52,9 +54,25 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
         private const string JWT_AUDIENCE_KEY = JWT_KEY + "audience";
         private const string JWT_CLOCK_SKEW_KEY = JWT_KEY + "clock_skew_seconds";
 
+        private const string BLOB_STORAGE_KEY = APPLICATION_KEY + "BlobStorage:";
+        private const string STORAGE_EVENTHUB_CONTAINER_KEY = BLOB_STORAGE_KEY + "eventhub_container";
+        private const string STORAGE_ACCOUNT_NAME_KEY = BLOB_STORAGE_KEY + "account_name";
+        private const string STORAGE_ACCOUNT_KEY_KEY = BLOB_STORAGE_KEY + "account_key";
+        private const string STORAGE_ACCOUNT_ENDPOINT_KEY = BLOB_STORAGE_KEY + "account_endpoint";
+        private const string STORAGE_ACCOUNT_ENDPOINT_DEFAULT = "core.windows.net";
+
+        private const string EVENTHUB_KEY = APPLICATION_KEY + "EventHub:";
+        private const string EVENTHUB_CONNECTION_KEY = EVENTHUB_KEY + "connection_string";
+        private const string EVENTHUB_NAME = EVENTHUB_KEY + "name";
+        private const string EVENTHUB_OFFSET_IN_MINUTES = EVENTHUB_KEY + "offset_in_minutes";
+
+        private const string LOGICAPP_KEY = APPLICATION_KEY + "LogicApp:";
+        private const string LOGICAPP_ENDPOINT_URL = LOGICAPP_KEY + "endpoint_url";
+
         public int Port { get; }
         public IServicesConfig ServicesConfig { get; }
         public IClientAuthConfig ClientAuthConfig { get; }
+        public IBlobStorageConfig blobStorageConfig { get; }
 
         public Config(IConfigData configData)
         {
@@ -72,7 +90,11 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
                 DocumentDbConnString = configData.GetString(DOCUMENTDB_CONNSTRING_KEY),
                 DocumentDbThroughput = configData.GetInt(DOCUMENTDB_RUS_KEY),
                 StorageAdapterApiUrl = configData.GetString(STORAGE_ADAPTER_API_URL_KEY),
-                StorageAdapterApiTimeout = configData.GetInt(STORAGE_ADAPTER_API_TIMEOUT_KEY)
+                StorageAdapterApiTimeout = configData.GetInt(STORAGE_ADAPTER_API_TIMEOUT_KEY),
+                EventHubConnectionString = configData.GetString(EVENTHUB_CONNECTION_KEY),
+                EventHubName = configData.GetString(EVENTHUB_NAME),
+                EventHubOffsetTimeInMinutes = configData.GetInt(EVENTHUB_OFFSET_IN_MINUTES),
+                LogicAppEndPointUrl = configData.GetString(LOGICAPP_ENDPOINT_URL)
             };
 
             this.ClientAuthConfig = new ClientAuthConfig
@@ -89,6 +111,14 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
                 JwtAudience = configData.GetString(JWT_AUDIENCE_KEY, String.Empty),
                 // By default the allowed clock skew is 2 minutes
                 JwtClockSkew = TimeSpan.FromSeconds(configData.GetInt(JWT_CLOCK_SKEW_KEY, 120)),
+            };
+
+            this.blobStorageConfig = new BlobStorageConfig
+            {
+                AccountKey = configData.GetString(STORAGE_ACCOUNT_KEY_KEY),
+                AccountName = configData.GetString(STORAGE_ACCOUNT_NAME_KEY),
+                EndpointSuffix = configData.GetString(STORAGE_ACCOUNT_ENDPOINT_KEY, STORAGE_ACCOUNT_ENDPOINT_DEFAULT),
+                EventHubContainer = configData.GetString(STORAGE_EVENTHUB_CONTAINER_KEY)
             };
         }
     }

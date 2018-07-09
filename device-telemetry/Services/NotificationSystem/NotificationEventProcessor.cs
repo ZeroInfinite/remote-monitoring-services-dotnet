@@ -15,11 +15,14 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
     public class NotificationEventProcessor : IEventProcessor
     {
         private readonly ILogger logger;
+        private readonly IServicesConfig servicesConfig;
 
         public NotificationEventProcessor(
-            ILogger logger)
+            ILogger logger,
+            IServicesConfig servicesConfig)
         {
             this.logger = logger;
+            this.servicesConfig = servicesConfig;
         }
 
         public Task CloseAsync(PartitionContext context, CloseReason reason)
@@ -50,14 +53,16 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
                 foreach (object jsonObject in alertObjects)
                 {
                     string temp = JsonConvert.SerializeObject(jsonObject, Formatting.Indented);
+                    Console.WriteLine(temp);
                     AlarmNotificationAsaModel alarmNotification = JsonConvert.DeserializeObject<AlarmNotificationAsaModel>(temp);
-
                     // Send Notification.
-                     Notification notification = new Notification();
-                     notification.setActionList(alarmNotification.Actions);
-                     notification.setAlarmInformation(alarmNotification.Rule_id, alarmNotification.Rule_description);
-                     notification.execute().Wait();
-
+                    Notification notification = new Notification(servicesConfig)
+                    {
+                        actionList = alarmNotification.Actions,
+                        ruleId = alarmNotification.Rule_id,
+                        ruleDescription = alarmNotification.Rule_description
+                    };
+                    notification.execute().Wait();
                 }
             }
             return Task.FromResult(0);

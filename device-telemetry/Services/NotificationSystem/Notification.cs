@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Models;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime;
 using Newtonsoft.Json;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem
@@ -12,7 +13,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 
     public interface INotification
     {
-        Boolean setReceiver(string receivers);
+        Boolean setReceiver(List<string> receivers);
         Boolean setMessage(string message, string ruleId, string ruleDescription);
         Boolean setCredentials(Dictionary<string, string> creds);
         Task execute();
@@ -20,46 +21,42 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
     public class Notification
     {
         private const EmailImplementationTypes EMAIL_IMPLEMENTATION_TYPE = EmailImplementationTypes.LogicApp;
+        private readonly IServicesConfig servicesConfig;
+        private INotification implementation;
 
-        public IList<ActionAsaModel> actionList;
-        public INotification implementation;
+        public IList<ActionAsaModel> actionList { get; set; }
+        public string ruleId { get; set; }
+        public string ruleName { get; set; }
+        public string ruleDescription { get; set; }
 
-        private string ruleId;
-        private string ruleDescription;
-
-        // Mapping to the Implementation type based on the setup.
         IDictionary<EmailImplementationTypes, Func<INotification>> actionsEmail = new Dictionary<EmailImplementationTypes, Func<INotification>>(){
-        {EmailImplementationTypes.LogicApp, () =>  new LogicApp()}
+            {EmailImplementationTypes.LogicApp, () =>  new LogicApp()}
         };
 
-        public Notification() { }
+        public Notification(IServicesConfig servicesConfig)
+        {
+            this.servicesConfig = servicesConfig;
+        }
 
         public async Task execute()
         {
             foreach (ActionAsaModel action in this.actionList)
             {
-                if (action.ActionType == "Email")
+                switch (action.ActionType)
                 {
-                    implementation = actionsEmail[EMAIL_IMPLEMENTATION_TYPE]();
-                    var credentialDictionary = new Dictionary<string, string>();
-                    credentialDictionary.Add("endPointURL", @"https://prod-00.southeastasia.logic.azure.com:443/workflows/1f2493004aea43e1ac661f071a15f330/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DIfPL17M7qydXwHxD7g-_K-P3mE6dqYuv7aDfbQji94");
-                    implementation.setCredentials(credentialDictionary);
+                    case "Email":
+                        implementation = actionsEmail[EMAIL_IMPLEMENTATION_TYPE]();
+                        var credentialDictionary = new Dictionary<string, string>()
+                            {
+                                {"endPointURL", this.servicesConfig.LogicAppEndPointUrl }
+                            };
+                        implementation.setCredentials(credentialDictionary);
+                        break;
                 }
                 implementation.setMessage((string)action.Parameters["Template"], this.ruleId, this.ruleDescription);
-                implementation.setReceiver(((Newtonsoft.Json.Linq.JArray)action.Parameters["Email"]).ToObject<List<string>>()[0]);
+                implementation.setReceiver(((Newtonsoft.Json.Linq.JArray)action.Parameters["Email"]).ToObject<List<string>>());
                 await implementation.execute();
             }
-        }
-
-        public void setActionList(IList<ActionAsaModel> actionList)
-        {
-            this.actionList = actionList;
-        }
-
-        public void setAlarmInformation(string ruleId, string ruleDescription)
-        {
-            this.ruleId = ruleId;
-            this.ruleDescription = ruleDescription;
         }
     }
 }

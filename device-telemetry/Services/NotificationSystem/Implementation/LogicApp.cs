@@ -4,15 +4,17 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation
 {
     public class LogicApp : INotification
     {
 
-        private string endointURL;
+        private string endointURL { get; set; }
         private string content;
-        private string email;
+        private List<string> email;
         private string ruleId;
         private string ruleDescription;
 
@@ -46,7 +48,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             return true;
         }
 
-        public bool setReceiver(string receiver)
+        public bool setReceiver(List<string> receiver)
         {
             try
             {
@@ -63,7 +65,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         {
             var emailContent = "Alarm fired for rule ID: " + this.ruleId + "  Rule Description: " + this.ruleDescription + " Custom Message: " + this.content;
             if (this.email == null || this.content == null) Console.WriteLine("No data provided");
-            return "{\"emailAddress\" : \"" + this.email + "\",\"template\": \"" + emailContent + "\"}";
+            return "{\"emailAddress\" : " + JArray.FromObject(this.email) + ",\"template\": \"" + emailContent + "\"}";
         }
 
         public async Task execute()

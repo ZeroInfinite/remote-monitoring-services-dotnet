@@ -13,8 +13,14 @@
       "launchBrowser": true,
       "launchUrl": "http://localhost:9004/v1/status",
       "environmentVariables": {
+        "PCS_TELEMETRY_EVENTHUB_CONNSTRING": "Endpoint=sb://eventhubnamespace-f3pvd.servicebus.windows.net/;SharedAccessKeyName=NotificationSystem;SharedAccessKey=W8C1Y/ZoBglooXxc1O1r2y5QBl7sa0nIwrYRl5h5YhA=;EntityPath=notificationsystem",
         "PCS_STORAGEADAPTER_WEBSERVICE_URL": "http://localhost:9022/v1",
-        "PCS_TELEMETRY_DOCUMENTDB_CONNSTRING": "AccountEndpoint=https://aayushdemo3475c.documents.azure.com:443/;AccountKey=Ki3tiv6Z2u4mcbr5A8XcijuYAA8KVxT3GATCgM84IAR6oDgIOQMrryAJzF581hILbkM9gyiHEk4bzBrZ1IIopA==;"
+        "PCS_TELEMETRY_EVENTHUB_NAME": "notificationsystem",
+        "PCS_ASA_DATA_AZUREBLOB_ENDPOINT_SUFFIX": "core.windows.net",
+        "PCS_TELEMETRY_LOGICAPP_ENDPOINT_URL": "https://prod-00.southeastasia.logic.azure.com:443/workflows/1f2493004aea43e1ac661f071a15f330/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DIfPL17M7qydXwHxD7g-_K-P3mE6dqYuv7aDfbQji94",
+        "PCS_ASA_DATA_AZUREBLOB_ACCOUNT": "aayushdemo",
+        "PCS_TELEMETRY_DOCUMENTDB_CONNSTRING": "AccountEndpoint=https://aayushdemo3475c.documents.azure.com:443/;AccountKey=Ki3tiv6Z2u4mcbr5A8XcijuYAA8KVxT3GATCgM84IAR6oDgIOQMrryAJzF581hILbkM9gyiHEk4bzBrZ1IIopA==;",
+        "PCS_ASA_DATA_AZUREBLOB_KEY": "qIFS9KOWkR+GUymNElgeGGQhwvATW5SNRii4R4OTWYi0aiT/JrIFnnLyJlUVigyIoNzr5TR9utGwZoK2ffioAw=="
       }
     },
     "WebService": {

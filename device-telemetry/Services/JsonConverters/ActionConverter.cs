@@ -33,7 +33,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.JsonConverters
             {
                 Enum.TryParse<Services.Models.Type>(jsonObject["Type"].Value<string>(), true, out Services.Models.Type action);
                 actionItem = actionMapping[action]();
-                // actionItem.Parameters = jsonObject["Parameters"].ToObject<Dictionary<string, object>>();
                 serializer.Populate(jsonObject.CreateReader(), actionItem);
                 actionItemList.Add(actionItem);
             }

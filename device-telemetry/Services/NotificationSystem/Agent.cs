@@ -17,29 +17,25 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 
     public class Agent : IAgent
     {
-        // For temporary use.
-        private const string EhConnectionString = "Endpoint=sb://eventhubnamespace-f3pvd.servicebus.windows.net/;SharedAccessKeyName=NotificationSystem;SharedAccessKey=W8C1Y/ZoBglooXxc1O1r2y5QBl7sa0nIwrYRl5h5YhA=;EntityPath=notificationsystem";
-        private const string EhEntityPath = "notificationsystem";
-        private const string StorageContainerName = "anothersystem";
-        private const string StorageAccountName = "aayushdemo";
-        private const string StorageAccountKey = "qIFS9KOWkR+GUymNElgeGGQhwvATW5SNRii4R4OTWYi0aiT/JrIFnnLyJlUVigyIoNzr5TR9utGwZoK2ffioAw==";
-
-        private static readonly string StorageConnectionString = string.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", StorageAccountName, StorageAccountKey);
-
-
         private readonly ILogger logger;
         private readonly IServicesConfig servicesConfig;
+        private readonly IBlobStorageConfig blobStorageConfig;
         private readonly IEventProcessorFactory notificationEventProcessorFactory;
+        private readonly IEventProcessorHostWrapper eventProcessorHostWrapper;
         private EventProcessorOptions eventProcessorOptions;
         private CancellationToken runState;
 
         public Agent(ILogger logger,
             IServicesConfig servicesConfig,
+            IBlobStorageConfig blobStorageConfig,
+            IEventProcessorHostWrapper eventProcessorHostWrapper,
             IEventProcessorFactory notificationEventProcessorFactory)
         {
             this.logger = logger;
             this.servicesConfig = servicesConfig;
+            this.blobStorageConfig = blobStorageConfig;
             this.notificationEventProcessorFactory = notificationEventProcessorFactory;
+            this.eventProcessorHostWrapper = eventProcessorHostWrapper;
         }
         public async Task RunAsync(CancellationToken runState)
         {
@@ -58,22 +54,26 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             {
                 try
                 {
-                    var eventProcessorHost = new EventProcessorHost(
-                        EhEntityPath,
+                    string storageConnectionString =
+                        $"DefaultEndpointsProtocol=https;AccountName={this.blobStorageConfig.AccountName};AccountKey={this.blobStorageConfig.AccountKey};EndpointSuffix={this.blobStorageConfig.EndpointSuffix}";
+
+                    var eventProcessorHost = this.eventProcessorHostWrapper.CreateEventProcessorHost(
+                        this.servicesConfig.EventHubName,
                         PartitionReceiver.DefaultConsumerGroupName,
-                        EhConnectionString,
-                        StorageConnectionString,
-                        StorageContainerName);
+                        this.servicesConfig.EventHubConnectionString,
+                        storageConnectionString,
+                        this.blobStorageConfig.EventHubContainer);
 
                     eventProcessorOptions = new EventProcessorOptions
                     {
-                        InitialOffsetProvider = (partitionId) => EventPosition.FromEnqueuedTime(DateTime.UtcNow)
+                        InitialOffsetProvider = (partitionId) => EventPosition.FromEnqueuedTime(DateTime.UtcNow.AddMinutes(0-this.servicesConfig.EventHubOffsetTimeInMinutes))
                     };
-                    await eventProcessorHost.RegisterEventProcessorFactoryAsync(this.notificationEventProcessorFactory, eventProcessorOptions);
+
+                    await this.eventProcessorHostWrapper.RegisterEventProcessorFactoryAsync(eventProcessorHost, this.notificationEventProcessorFactory, eventProcessorOptions);
                 }
                 catch (Exception e)
                 {
-                    this.logger.Error("Received error setting up event hub. Will not receive updates from devices", () => new { e });
+                    this.logger.Error("Received error setting up event hub. Will not receive alarm notification from the eventhub", () => new { e });
                 }
             }
         }
