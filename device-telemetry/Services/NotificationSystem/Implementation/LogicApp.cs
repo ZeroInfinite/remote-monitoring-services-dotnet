@@ -65,7 +65,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             var httpRespose = await this.httpClient.PostAsync(this.httpRequest);
             if(httpRespose.StatusCode == 0)
             {
-                this.logger.Info("Error sending request to the LogicApp endpoiint URL", () => new { httpRespose.Content });
+                this.logger.Info("Error sending request to the LogicApp endpoiint URL", () => new { httpRespose.StatusCode });
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.EventHubs;
@@ -63,17 +64,36 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             await Task.FromResult(0);
         }
 
-        IEnumerable<object> DeserializeJsonObjectList(string json)
+        public IEnumerable<object> DeserializeJsonObjectList(string json)
         {
-            JsonSerializer serializer = new JsonSerializer();
-            using (var stringReader = new StringReader(json))
+            if ((json != null) && (json != ""))
             {
-                using (var jsonReader = new JsonTextReader(stringReader))
+                json = json.Substring(json.IndexOf("{"));
+                object temp = String.Empty;
+                JsonSerializer serializer = new JsonSerializer();
+                using (var stringReader = new StringReader(json))
                 {
-                    jsonReader.SupportMultipleContent = true;
-                    while (jsonReader.Read())
+                    using (var jsonReader = new JsonTextReader(stringReader))
                     {
-                        yield return serializer.Deserialize(jsonReader);
+                        jsonReader.SupportMultipleContent = true;
+                        while (jsonReader.Read())
+                        {
+                            try
+                            {
+                                temp = serializer.Deserialize(jsonReader);
+                            }
+                            catch (JsonReaderException e)
+                            {
+                                this.logger.Info("Error parsing the json string", () => new { e });
+                                break;
+                            }
+                            catch (Exception e)
+                            {
+                                this.logger.Info("Exception parsing the json string", () => new { e });
+                                break;
+                            }
+                            yield return temp;
+                        }
                     }
                 }
             }

@@ -27,12 +27,8 @@ namespace Services.Test
         private readonly Mock<ILogger> logMock;
         private readonly Mock<IEventProcessorHostWrapper> eventProcessorHostWrapperMock;
         private readonly Mock<IEventProcessorFactory> eventProcessorFactoryMock;
-        private readonly Mock<EventProcessorHost> eventProcessorHostMock;
-        private readonly Mock<NotificationEventProcessor> eventProcessorMock;
         private readonly Mock<IServicesConfig> servicesConfigMock;
         private readonly Mock<IBlobStorageConfig> blobStorageConfigMock;
-        private readonly Mock<EventData> eventDataMock;
-        private readonly Mock<PartitionContext> partitionContextMock;
         private readonly Mock<INotification> notificationMock;
         private readonly Mock<IImplementation> implementationMock;
         private readonly Mock<IImplementationWrapper> implementationWrapperMock;
@@ -65,18 +61,36 @@ namespace Services.Test
             this.agentsRunState = new CancellationTokenSource();
         }
 
-        [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
-        public void TestProcessEventsAsyncMakesProperCall()
+        [Theory, Trait(Constants.TYPE, Constants.UNIT_TEST)]
+        [InlineData(2, 2)]
+        [InlineData(0, 0)]
+        public void Should_CallExecuteForNTimesEqualToNumberOfJsonTokenInEventData_When_NJsonObjectsInOneEventData(int numJson, int numCalls)
         {
             // Setup
             this.notificationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
-            var tempEventData = new EventData(getSamplePayLoadData());
+            var tempEventData = new EventData(getSamplePayLoadDataWithNalerts(numJson));
 
             // Act
-            this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), new List<EventData>() { tempEventData });
+            this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), new EventData[] { tempEventData });
             
             // Assert
-            this.notificationMock.Verify(e => e.execute(), Times.Once());
+            this.notificationMock.Verify(e => e.execute(), Times.Exactly(numCalls));
+        }
+
+        [Theory, Trait(Constants.TYPE, Constants.UNIT_TEST)]
+        [InlineData(2, 2)]
+        [InlineData(0, 0)]
+        public void Should_CallExecuteForNTimesEqualToNumberOfEventDataInMessages_When_EachEventDataHasOneJsonObject(int numEventData, int numCalls)
+        { // Task.Completed Task is being passed over or Deserialize JsonObjectList is returning directly to this method.
+            // Setup
+            this.notificationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
+            var tempEventData = new EventData(getSamplePayLoadDataWithNalerts(1));
+
+            // Act
+            this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), Enumerable.Repeat<EventData>(tempEventData, numEventData).ToArray<EventData>());
+
+            // Assert
+            this.notificationMock.Verify(e => e.execute(), Times.Exactly(numCalls));
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -91,12 +105,13 @@ namespace Services.Test
             this.notificationSystemAgent.RunAsync(this.runState);
 
             // Assert
-            this.eventProcessorHostWrapperMock.Verify(a => a.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(), It.IsAny<IEventProcessorFactory>(), It.IsAny<EventProcessorOptions>()), Times.Once);
+            this.eventProcessorHostWrapperMock.Verify(a => a.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(), 
+                It.IsAny<IEventProcessorFactory>(), It.IsAny<EventProcessorOptions>()), Times.Once);
 
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
-        public void Should_WriteErrorToTheLogger_When_InvalidCredentialsPassedToRegisterEventProcessorFactory()
+        public void Should_ThrowExceptionAndWriteErrorToTheLogger_When_InvalidCredentialsPassedToRegisterEventProcessorFactory()
         {
             // Arrange
             this.runState = this.agentsRunState.Token;
@@ -128,27 +143,36 @@ namespace Services.Test
 
         }
 
-        [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
-        public void Should_ReturnAnEnumeratorOverAListOfProperJsonStrings_When_ValidInputJsonString()
+        [Theory, Trait(Constants.TYPE, Constants.UNIT_TEST)]
+        [InlineData(2, 2)]
+        [InlineData(0, 0)]
+        public void Should_ReturnAnEnumeratorOverAListOfProperJsonStrings_When_ValidInputJsonStringWithNnumberOfJsonTokens(int numJson, int numReturnJsonString)
         {
+            // Setup
+            var tempJson = getSampleJsonRepeatedNTimes(numJson);
+            var tempNotificationEventProcessor = new NotificationEventProcessor(this.logMock.Object, this.servicesConfigMock.Object, this.notificationMock.Object);
 
+            // Act and Assert
+            Assert.Equal(tempNotificationEventProcessor.DeserializeJsonObjectList(tempJson).ToArray().Length, numReturnJsonString);
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
-        // Work on the signature of DeserializeJsonObjectMethod
-        public void Should_WriteToTheLogger_WhenInvalidJsonString()
+        public void Should_NotCallExecuteMethod_WhenEmptyString()
         {
+            // Setup
+            var tempJson = getSampleJsonRepeatedNTimes(1).Substring(0, getSampleJsonRepeatedNTimes(1).Length - 2);
+            var tempNotificationEventProcessor = new NotificationEventProcessor(this.logMock.Object, this.servicesConfigMock.Object, this.notificationMock.Object);
 
-        }
+            // Act
+            tempNotificationEventProcessor.DeserializeJsonObjectList(tempJson);
 
-        [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
-        public void Should_ReturnAnEnumeratorOverOneJsonString_When_OneInoutJsonString()
-        {
-
+            // Assert
+            this.logMock.Verify(a => a.Info(It.IsAny<string>(), It.IsAny<Action>()), Times.Never);
         }
 
         [Theory, Trait(Constants.TYPE, Constants.UNIT_TEST)]
         [InlineData(2, 2)]
+        [InlineData(0, 0)]
         public void Should_CallExecuteMethodEqualToTheNumberOfCalls_To_TheNumberOfActionItemsInAlert(int numOfActionItems, int numOfCalls)
         {
             // Arrange
@@ -197,13 +221,13 @@ namespace Services.Test
                 this.httpRequestMock.Object, this.httpClientMock.Object, this.logMock.Object);
             this.httpClientMock.Setup(x => x.PostAsync(It.IsAny<IHttpRequest>())).Returns(
                 Task.FromResult<IHttpResponse>(new HttpResponse(0, It.IsAny<string>(), It.IsAny<HttpResponseHeaders>())));
-            tempLogicApp.setReceiver(new List<string>() { "asdad" });
+            tempLogicApp.setReceiver(new List<string>() { It.IsAny<string>() });
 
             // Act
             tempLogicApp.execute().Wait();
 
-            // Assert
-            this.logMock.Verify(x => x.Info(It.IsAny<string>(), It.IsAny<Action>()), Times.Once);
+            // Assert => Logger value same :( 
+            this.logMock.Verify(x => x.Info("Error sending request to the LogicApp endpoiint URL", It.IsAny<Action>), Times.Once);
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -212,7 +236,7 @@ namespace Services.Test
             // Setup
             var tempLogicApp = new LogicApp(It.IsAny<string>(), It.IsAny<string>(),
                 this.httpRequestMock.Object, this.httpClientMock.Object, this.logMock.Object);
-            tempLogicApp.setReceiver(new List<string>() { "asdad" });
+            tempLogicApp.setReceiver(new List<string>() { It.IsAny<string>() });
             this.httpClientMock.Setup(x => x.PostAsync(It.IsAny<IHttpRequest>())).Returns(
                 Task.FromResult<IHttpResponse>(new HttpResponse(System.Net.HttpStatusCode.OK, It.IsAny<string>(), It.IsAny<HttpResponseHeaders>())));
 
@@ -226,7 +250,6 @@ namespace Services.Test
 
         private AlarmNotificationAsaModel getSampleAlarmWithnActions(int n)
         {
-
             return new AlarmNotificationAsaModel()
             {
                 Rule_id = "12345",
@@ -249,7 +272,41 @@ namespace Services.Test
             };
         }
 
-        private static byte[] getSamplePayLoadData()
+        private static byte[] getSamplePayLoadDataWithNalerts(int n)
+        {
+            var dictionary = new Dictionary<string, object>()
+            {
+                {"created", "342874237482374" },
+                {"modified", "1234123123123" },
+                {"rule.description", "Pressure > 380 Aayush" },
+                {"rule.severity", "Critical" },
+                {"rule.id", "12345" },
+                {"rule.actions", new List<object>()
+                {
+                    new Dictionary<string, object>(){
+                    {"Type", "Email" },
+                    {"Parameters", new Dictionary<string, object>(){
+                        {"Template", "This is a test email."},
+                        {"Email", new List<string>(){ "agupta.aayush8484@gmail.com", "t-aagupt@microsoft.com" } }
+                    }
+                    }
+                }
+                }
+                },
+                {"device.id", "213123" },
+                {"device.msg.received", "1234123123123" }
+            };
+            var dictionaryList = Enumerable.Repeat<Dictionary<string, object>>(dictionary, n);
+            var jsonDictionary = JsonConvert.SerializeObject(dictionaryList);
+
+            var binaryFormatter = new BinaryFormatter();
+            var memoryStream = new MemoryStream();
+            binaryFormatter.Serialize(memoryStream, jsonDictionary);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            return memoryStream.ToArray();
+        }
+
+        private static string getSampleJsonRepeatedNTimes(int n)
         {
             var dictionary = new Dictionary<string, object>()
             {
@@ -274,12 +331,8 @@ namespace Services.Test
                 {"device.msg.received", "1234123123123" }
 
             };
-            var jsonDictionary = JsonConvert.SerializeObject(dictionary);
-            var binaryFormatter = new BinaryFormatter();
-            var memoryStream = new MemoryStream();
-            binaryFormatter.Serialize(memoryStream, jsonDictionary);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-            return memoryStream.ToArray().Skip(24).ToArray();
+            var a = JsonConvert.SerializeObject(dictionary);
+            return String.Join("", Enumerable.Repeat<string>(a, n).ToArray());
         }
     }  
 }
