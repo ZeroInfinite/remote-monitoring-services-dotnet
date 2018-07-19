@@ -2,10 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Models
 {
-    public class ActionAsaModel
+    public interface IActionAsaModel
+    {
+        string ActionType { get; set; }
+        IDictionary<string, object> Parameters { get; set; }
+    }
+
+    public class ActionAsaModel: IActionAsaModel
     {
         [JsonProperty(PropertyName = "Type")]
         public string ActionType { get; set; } = string.Empty;

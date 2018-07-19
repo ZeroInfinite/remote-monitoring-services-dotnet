@@ -10,6 +10,7 @@ using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Http;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService
 {
@@ -77,10 +78,24 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService
             // Auth and CORS setup
             Auth.Startup.SetupDependencies(builder, config);
 
+            // Http
+            IHttpClient httpClient = new HttpClient(logger);
+            builder.RegisterInstance(httpClient).As<IHttpClient>();
+
+            IHttpRequest httpRequest = new HttpRequest();
+            builder.RegisterInstance(httpRequest).As<IHttpRequest>();
+
+            // Setup Notification
+            IImplementationWrapper implementationWrapper = new ImplementationWraper(config.ServicesConfig, httpRequest, httpClient, logger);
+            builder.RegisterInstance(implementationWrapper).As<IImplementationWrapper>();
+
+            INotification notification = new Notification(implementationWrapper);
+            builder.RegisterInstance(notification).As<INotification>();
+
             //EventHub classes
             IEventProcessorHostWrapper eventProcessorHostWrapper = new EventProcessorHostWrapper();
             builder.RegisterInstance(eventProcessorHostWrapper).As<IEventProcessorHostWrapper>().SingleInstance();
-            IEventProcessorFactory eventProcessorFactory = new NotificationEventProcessorFactory(logger, config.ServicesConfig);
+            IEventProcessorFactory eventProcessorFactory = new NotificationEventProcessorFactory(logger, config.ServicesConfig, notification);
             builder.RegisterInstance(eventProcessorFactory).As<IEventProcessorFactory>().SingleInstance();
 
             // NotificationSystemAgent uses default implementation because using eventHubFactory. 

@@ -11,17 +11,20 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
     {
         private readonly ILogger logger;
         private readonly IServicesConfig servicesConfig;
+        private readonly INotification notification;
 
         public NotificationEventProcessorFactory(
             ILogger logger,
-            IServicesConfig servicesConfig)
+            IServicesConfig servicesConfig, 
+            INotification notification)
         {
             this.logger = logger;
             this.servicesConfig = servicesConfig;
+            this.notification = notification;
         }
         public IEventProcessor CreateEventProcessor(PartitionContext context)
         {
-            return new NotificationEventProcessor(this.logger, this.servicesConfig);
+            return new NotificationEventProcessor(this.logger, this.servicesConfig, this.notification);
         }
     }
 }

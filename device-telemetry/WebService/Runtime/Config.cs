@@ -94,7 +94,10 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
                 EventHubConnectionString = configData.GetString(EVENTHUB_CONNECTION_KEY),
                 EventHubName = configData.GetString(EVENTHUB_NAME),
                 EventHubOffsetTimeInMinutes = configData.GetInt(EVENTHUB_OFFSET_IN_MINUTES),
-                LogicAppEndPointUrl = configData.GetString(LOGICAPP_ENDPOINT_URL)
+                LogicAppEndPointUrl = configData.GetString(LOGICAPP_ENDPOINT_URL),
+                // Work around for accessing the solution name, storage account name set to 
+                // Solution name by default. 
+                SolutionName = configData.GetString(STORAGE_ACCOUNT_NAME_KEY)
             };
 
             this.ClientAuthConfig = new ClientAuthConfig

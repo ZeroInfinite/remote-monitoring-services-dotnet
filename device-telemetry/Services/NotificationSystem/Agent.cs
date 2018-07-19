@@ -22,6 +22,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         private readonly IBlobStorageConfig blobStorageConfig;
         private readonly IEventProcessorFactory notificationEventProcessorFactory;
         private readonly IEventProcessorHostWrapper eventProcessorHostWrapper;
+
         private EventProcessorOptions eventProcessorOptions;
         private CancellationToken runState;
 
@@ -66,7 +67,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 
                     eventProcessorOptions = new EventProcessorOptions
                     {
-                        InitialOffsetProvider = (partitionId) => EventPosition.FromEnqueuedTime(DateTime.UtcNow.AddMinutes(0-this.servicesConfig.EventHubOffsetTimeInMinutes))
+                        InitialOffsetProvider = (partitionId) => EventPosition.FromEnqueuedTime(DateTime.UtcNow.AddMinutes(0 - this.servicesConfig.EventHubOffsetTimeInMinutes))
                     };
 
                     await this.eventProcessorHostWrapper.RegisterEventProcessorFactoryAsync(eventProcessorHost, this.notificationEventProcessorFactory, eventProcessorOptions);

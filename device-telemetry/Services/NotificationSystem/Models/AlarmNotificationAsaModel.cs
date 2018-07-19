@@ -7,8 +7,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 {
     public class AlarmNotificationAsaModel
     {
-
-
         [JsonProperty(PropertyName = "created")]
         public string DateCreated { get; set; }
 

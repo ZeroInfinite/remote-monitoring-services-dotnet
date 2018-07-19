@@ -81,7 +81,11 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models
             {
                 return false;
             }
-            catch (InvalidCastException e)
+            catch (InvalidCastException)
+            {
+                return false;
+            }
+            catch (Exception)
             {
                 return false;
             }

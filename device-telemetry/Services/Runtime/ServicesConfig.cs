@@ -20,6 +20,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime
         string EventHubConnectionString { get; set; }
         int EventHubOffsetTimeInMinutes { get; set; }
         string LogicAppEndPointUrl { get; set; }
+        string SolutionName { get; set; }
     }
 
     public class ServicesConfig : IServicesConfig
@@ -47,6 +48,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime
         public int DocumentDbThroughput { get; set; }
 
         public string LogicAppEndPointUrl { get; set; }
+
+        public string SolutionName { get; set; }
 
         public string DocumentDbConnString
         {

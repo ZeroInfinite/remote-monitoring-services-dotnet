@@ -1,95 +1,87 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation
 {
-    public class LogicApp : INotification
+    public class LogicApp : IImplementation
     {
+        private readonly IHttpClient httpClient;
+        private readonly IHttpRequest httpRequest;
+        private readonly ILogger logger;
 
-        private string endointURL { get; set; }
+        private string endointURL;
         private string content;
         private List<string> email;
         private string ruleId;
         private string ruleDescription;
+        private string solutionName;
 
-        public LogicApp() { }
-
-        public bool setCredentials(Dictionary<string, string> creds)
+        public LogicApp(string endPointUrl, string solutionName, IHttpRequest httpRequest, IHttpClient httpClient, ILogger logger)
         {
-            try
-            {
-                this.endointURL = creds["endPointURL"];
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-            return true;
+            this.endointURL = endPointUrl;
+            this.solutionName = solutionName;
+            this.httpClient = httpClient;
+            this.httpRequest = httpRequest;
+            this.logger = logger;
+
+            // Default for other parameters:
+            this.content = "";
+            this.ruleId = "";
+            this.ruleDescription = "";
         }
 
-        public bool setMessage(string message, string ruleId, string ruleDescription)
+        public void setMessage(string message, string ruleId, string ruleDescription)
         {
-            try
-            {
                 this.content = message;
                 this.ruleId = ruleId;
                 this.ruleDescription = ruleDescription;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-            return true;
         }
 
-        public bool setReceiver(List<string> receiver)
+        public void setReceiver(List<string> receiver)
         {
-            try
-            {
-                this.email = receiver;
-            }
-            catch (Exception e)
-            {
-                return false;
-            }
-            return true;
+             this.email = receiver;
         }
 
         private string generatePayLoad()
         {
-            var emailContent = "Alarm fired for rule ID: " + this.ruleId + "  Rule Description: " + this.ruleDescription + " Custom Message: " + this.content;
-            if (this.email == null || this.content == null) Console.WriteLine("No data provided");
+            var emailContent = "Alarm fired for rule ID: " + this.ruleId + "  Rule Description: " +
+                this.ruleDescription + " Custom Message: " + this.content + "Alarm Detail Page: " + this.GenerateRuleDetailUrl();
             return "{\"emailAddress\" : " + JArray.FromObject(this.email) + ",\"template\": \"" + emailContent + "\"}";
         }
 
         public async Task execute()
         {
-            var clientHandler = new HttpClientHandler();
-            using (var client = new HttpClient(clientHandler))
+            this.httpRequest.SetUriFromString(this.endointURL);
+            string content = this.generatePayLoad();
+            this.httpRequest.SetContent(content, Encoding.UTF8, "application/json");
+            this.httpRequest.AddHeader("content-type", "application/json");
+            // Client library handles Exception.
+            var httpRespose = await this.httpClient.PostAsync(this.httpRequest);
+            if(httpRespose.StatusCode == 0)
             {
-                var httpRequest = new HttpRequestMessage
-                {
-                    Method = HttpMethod.Post,
-                    RequestUri = new Uri(this.endointURL)
-                };
-                string content = this.generatePayLoad();
-                httpRequest.Content = new StringContent(content, Encoding.UTF8, "application/json");
-                httpRequest.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                try
-                {
-                    HttpResponseMessage response = await client.SendAsync(httpRequest);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error reading contact Info.");
-                }
+                this.logger.Info("Error sending request to the LogicApp endpoiint URL", () => new { httpRespose.Content });
             }
+        }
+
+        private string GenerateRuleDetailUrl()
+        {
+            /*
+             "storageName": {
+            "type": "string",
+            "defaultValue": "[concat('storage', take(uniqueString(subscription().subscriptionId, resourceGroup().id, parameters('solutionName')), 5))]",
+            "metadata": {
+                "description": "The name of the storageAccount"
+            }
+            // The deployment sets the storage account name as the solution name. 
+            // Work around, can set an environment variable. 
+             */
+            return "https://" + this.solutionName + ".azurewebsites.net/maintenance/rule/" + this.ruleId;
         }
     }
 }

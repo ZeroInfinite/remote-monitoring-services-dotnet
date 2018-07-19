@@ -16,13 +16,16 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
     {
         private readonly ILogger logger;
         private readonly IServicesConfig servicesConfig;
+        private readonly INotification notification;
 
         public NotificationEventProcessor(
             ILogger logger,
-            IServicesConfig servicesConfig)
+            IServicesConfig servicesConfig,
+            INotification notification)
         {
             this.logger = logger;
             this.servicesConfig = servicesConfig;
+            this.notification = notification;
         }
 
         public Task CloseAsync(PartitionContext context, CloseReason reason)
@@ -43,29 +46,21 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             return Task.CompletedTask;
         }
 
-        public Task ProcessEventsAsync(PartitionContext context, IEnumerable<EventData> messages)
+        public async Task ProcessEventsAsync(PartitionContext context, IEnumerable<EventData> messages)
         {
             foreach (EventData eventData in messages)
             {
-                var data = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
-                //// Parse into Action object.
+                var data = Encoding.UTF8.GetString(eventData.Body.Array);
                 IEnumerable<dynamic> alertObjects = DeserializeJsonObjectList(data);
                 foreach (object jsonObject in alertObjects)
                 {
                     string temp = JsonConvert.SerializeObject(jsonObject, Formatting.Indented);
-                    Console.WriteLine(temp);
                     AlarmNotificationAsaModel alarmNotification = JsonConvert.DeserializeObject<AlarmNotificationAsaModel>(temp);
-                    // Send Notification.
-                    Notification notification = new Notification(servicesConfig)
-                    {
-                        actionList = alarmNotification.Actions,
-                        ruleId = alarmNotification.Rule_id,
-                        ruleDescription = alarmNotification.Rule_description
-                    };
-                    notification.execute().Wait();
+                    this.notification.alarm = alarmNotification;
+                    await notification.execute();
                 }
             }
-            return Task.FromResult(0);
+            await Task.FromResult(0);
         }
 
         IEnumerable<object> DeserializeJsonObjectList(string json)
