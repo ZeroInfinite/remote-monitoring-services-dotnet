@@ -14,13 +14,13 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         AlarmNotificationAsaModel alarm { get; set; }
     }
 
-    public class Notification: INotification
+    public class Notification : INotification
     {
         private const EmailImplementationTypes EMAIL_IMPLEMENTATION_TYPE = EmailImplementationTypes.LogicApp;
         private readonly IImplementationWrapper implementationWrapper;
         private ILogger logger;
         private IImplementation implementation;
-       
+
         public AlarmNotificationAsaModel alarm { get; set; }
 
         public Notification(IImplementationWrapper implementationWrapper,
@@ -41,10 +41,11 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
                         break;
                 }
                 implementation.setMessage((string)action.Parameters["Template"], this.alarm.Rule_id, this.alarm.Rule_description);
-                if(action.Parameters["Email"] != null) implementation.setReceiver(((Newtonsoft.Json.Linq.JArray)action.Parameters["Email"]).ToObject<List<string>>());
-                if (await implementation.execute() == 0){
+                if (action.Parameters["Email"] != null) implementation.setReceiver(((Newtonsoft.Json.Linq.JArray)action.Parameters["Email"]).ToObject<List<string>>());
+                if (await implementation.execute() == 0)
+                {
                     this.logger.Info("Error executing the action", () => { });
-                } 
+                }
             }
         }
     }

@@ -20,8 +20,6 @@ namespace Services.Test
         private readonly Mock<IEventProcessorHostWrapper> eventProcessorHostWrapperMock;
         private readonly Mock<IBlobStorageConfig> blobStorageConfigMock;
         private readonly Mock<IEventProcessorFactory> eventProcessorFactoryMock;
-
-
         private readonly IAgent notificationSystemAgent;
 
         private CancellationTokenSource agentsRunState;

@@ -41,12 +41,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         public async Task RunAsync(CancellationToken runState)
         {
             this.runState = runState;
-
             this.logger.Info("Notification System Running", () => { });
-
             await this.SetupEventHub(this.runState);
-
-            this.logger.Info("Notification System Exiting", () => { });
         }
 
         private async Task SetupEventHub(CancellationToken runState)
@@ -57,19 +53,16 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
                 {
                     string storageConnectionString =
                         $"DefaultEndpointsProtocol=https;AccountName={this.blobStorageConfig.AccountName};AccountKey={this.blobStorageConfig.AccountKey};EndpointSuffix={this.blobStorageConfig.EndpointSuffix}";
-
                     var eventProcessorHost = this.eventProcessorHostWrapper.CreateEventProcessorHost(
                         this.servicesConfig.EventHubName,
                         PartitionReceiver.DefaultConsumerGroupName,
                         this.servicesConfig.EventHubConnectionString,
                         storageConnectionString,
                         this.blobStorageConfig.EventHubContainer);
-
                     eventProcessorOptions = new EventProcessorOptions
                     {
                         InitialOffsetProvider = (partitionId) => EventPosition.FromEnqueuedTime(DateTime.UtcNow.AddMinutes(0 - this.servicesConfig.EventHubOffsetTimeInMinutes))
                     };
-
                     await this.eventProcessorHostWrapper.RegisterEventProcessorFactoryAsync(eventProcessorHost, this.notificationEventProcessorFactory, eventProcessorOptions);
                 }
                 catch (Exception e)

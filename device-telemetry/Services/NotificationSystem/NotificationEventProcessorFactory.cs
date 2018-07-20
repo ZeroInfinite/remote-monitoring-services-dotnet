@@ -14,7 +14,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 
         public NotificationEventProcessorFactory(
             ILogger logger,
-            IServicesConfig servicesConfig, 
+            IServicesConfig servicesConfig,
             INotification notification)
         {
             this.logger = logger;

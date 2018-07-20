@@ -39,14 +39,14 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 
         public void setMessage(string message, string ruleId, string ruleDescription)
         {
-                this.content = message;
-                this.ruleId = ruleId;
-                this.ruleDescription = ruleDescription;
+            this.content = message;
+            this.ruleId = ruleId;
+            this.ruleDescription = ruleDescription;
         }
 
         public void setReceiver(List<string> receiver)
         {
-             this.email = receiver;
+            this.email = receiver;
         }
 
         private string generatePayLoad()

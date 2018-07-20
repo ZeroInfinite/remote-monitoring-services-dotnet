@@ -12,7 +12,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         IDictionary<string, object> Parameters { get; set; }
     }
 
-    public class ActionAsaModel: IActionAsaModel
+    public class ActionAsaModel : IActionAsaModel
     {
         [JsonProperty(PropertyName = "Type")]
         public string ActionType { get; set; } = string.Empty;

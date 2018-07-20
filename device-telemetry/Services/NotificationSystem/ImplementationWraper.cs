@@ -12,7 +12,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         IImplementation GetImplementationType(EmailImplementationTypes actionType);
     }
 
-    public class ImplementationWraper: IImplementationWrapper
+    public class ImplementationWraper : IImplementationWrapper
     {
         private readonly IServicesConfig servicesConfig;
         private readonly IHttpClient httpClient;
@@ -32,7 +32,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             switch (actionType)
             {
                 case EmailImplementationTypes.LogicApp:
-                    return new LogicApp(this.servicesConfig.LogicAppEndPointUrl, this.servicesConfig.SolutionName,this.httpRequest, this.httpClient, this.logger);
+                    return new LogicApp(this.servicesConfig.LogicAppEndPointUrl, this.servicesConfig.SolutionName, this.httpRequest, this.httpClient, this.logger);
             }
             return null;
         }

@@ -107,7 +107,7 @@ namespace Services.Test
 
         private bool IsListOfEmailEqual(IList<string> emailList)
         {
-            var checkList = new Newtonsoft.Json.Linq.JArray() {PARAM_EMAIL};
+            var checkList = new Newtonsoft.Json.Linq.JArray() { PARAM_EMAIL };
             foreach (var email in checkList)
             {
                 if (!emailList.Contains((string)email)) return false;
