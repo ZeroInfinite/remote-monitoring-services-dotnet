@@ -1,6 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
 using System.Collections.Generic;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Models

@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
-using Services.Test.helpers;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
+using System;
 using System.Threading;
-using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
-using Moq;
 using System.Threading.Tasks;
 using Microsoft.Azure.EventHubs.Processor;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime;
+using Moq;
+using Services.Test.helpers;
+using Xunit;
 
 namespace Services.Test
 {

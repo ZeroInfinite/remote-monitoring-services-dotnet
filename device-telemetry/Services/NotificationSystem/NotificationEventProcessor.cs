@@ -1,7 +1,8 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.EventHubs;
@@ -52,7 +53,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             foreach (EventData eventData in messages)
             {
                 var data = Encoding.UTF8.GetString(eventData.Body.Array);
-                IEnumerable<dynamic> alertObjects = DeserializeJsonObjectList(data);
+                IEnumerable<object> alertObjects = DeserializeJsonObjectList(data);
                 foreach (object jsonObject in alertObjects)
                 {
                     string temp = JsonConvert.SerializeObject(jsonObject, Formatting.Indented);
@@ -66,8 +67,10 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 
         public IEnumerable<object> DeserializeJsonObjectList(string json)
         {
+            IList<object> returnList = new List<object>();
             if ((json != null) && (json != ""))
             {
+                // Confirming that the string doesn't get invalid characters. 
                 json = json.Substring(json.IndexOf("{"));
                 object temp = String.Empty;
                 JsonSerializer serializer = new JsonSerializer();
@@ -80,7 +83,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
                         {
                             try
                             {
-                                temp = serializer.Deserialize(jsonReader);
+                                returnList.Add(serializer.Deserialize(jsonReader));
                             }
                             catch (JsonReaderException e)
                             {
@@ -92,11 +95,11 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
                                 this.logger.Info("Exception parsing the json string", () => new { e });
                                 break;
                             }
-                            yield return temp;
                         }
                     }
                 }
             }
+            return returnList;
         }
     }
 }

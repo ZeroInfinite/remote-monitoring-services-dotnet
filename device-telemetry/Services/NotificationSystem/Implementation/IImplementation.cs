@@ -1,6 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
 using System.Collections.Generic;
-using System.Text;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation
@@ -9,6 +10,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
     {
         void setReceiver(List<string> receivers);
         void setMessage(string message, string ruleId, string ruleDescription);
-        Task execute();
+        Task<HttpStatusCode> execute();
     }
 }

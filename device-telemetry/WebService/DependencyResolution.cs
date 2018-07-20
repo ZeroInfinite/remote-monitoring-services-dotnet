@@ -6,11 +6,11 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.Azure.EventHubs.Processor;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Http;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
-using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Http;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService
 {
@@ -89,7 +89,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService
             IImplementationWrapper implementationWrapper = new ImplementationWraper(config.ServicesConfig, httpRequest, httpClient, logger);
             builder.RegisterInstance(implementationWrapper).As<IImplementationWrapper>();
 
-            INotification notification = new Notification(implementationWrapper);
+            INotification notification = new Notification(implementationWrapper, logger);
             builder.RegisterInstance(notification).As<INotification>();
 
             //EventHub classes

@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
-using Services.Test.helpers;
-using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation;
-using Moq;
-using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Http;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
+System.Collections.Generic;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Http;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation;
+using Moq;
+using Services.Test.helpers;
+using Xunit;
 
 namespace Services.Test
 {
@@ -26,7 +27,7 @@ namespace Services.Test
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
-        public void Should_SendPostRequestToLogicAppEndPointUrl_WhenValidEndPointUrl()
+        public void Should_ReturnInvalidRequestStatusCode_WhenInValidEndPointUrl()
         {
             // Setup
             var tempLogicApp = new LogicApp(It.IsAny<string>(), It.IsAny<string>(),
@@ -36,14 +37,14 @@ namespace Services.Test
             tempLogicApp.setReceiver(new List<string>() { It.IsAny<string>() });
 
             // Act
-            tempLogicApp.execute().Wait();
+            var a = tempLogicApp.execute().Result;
 
             // Assert => Logger value same :( 
-            this.logMock.Verify(x => x.Info("Error sending request to the LogicApp endpoiint URL", It.IsAny<Action>), Times.Once);
+            Assert.Equal<HttpStatusCode>(0, a);
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
-        public void Should_WriteErrorToTheLogger_When_InvalidEndPointUrl()
+        public void Should_ReturnOkStatusCode_When_ValidEndPointUrl()
         {
             // Setup
             var tempLogicApp = new LogicApp(It.IsAny<string>(), It.IsAny<string>(),
@@ -53,10 +54,10 @@ namespace Services.Test
                 Task.FromResult<IHttpResponse>(new HttpResponse(System.Net.HttpStatusCode.OK, It.IsAny<string>(), It.IsAny<HttpResponseHeaders>())));
 
             // Act
-            tempLogicApp.execute().Wait();
+            var a = tempLogicApp.execute().Result;
 
             // Assert
-            this.logMock.Verify(x => x.Info(It.IsAny<string>(), It.IsAny<Action>()), Times.Never);
+            Assert.Equal<HttpStatusCode>(HttpStatusCode.OK, a);
         }
 
     }

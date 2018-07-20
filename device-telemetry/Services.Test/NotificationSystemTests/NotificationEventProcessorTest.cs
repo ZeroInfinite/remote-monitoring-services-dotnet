@@ -1,9 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.EventHubs;
 using Microsoft.Azure.EventHubs.Processor;
@@ -54,13 +55,12 @@ namespace Services.Test
         [InlineData(2, 2)]
         [InlineData(0, 0)]
         public void Should_CallExecuteForNTimesEqualToNumberOfEventDataInMessages_When_EachEventDataHasOneJsonObject(int numEventData, int numCalls)
-        { // Task.Completed Task is being passed over or Deserialize JsonObjectList is returning directly to this method.
+        {
             // Setup
             this.notificationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
             var tempEventData = new EventData(getSamplePayLoadDataWithNalerts(1));
-
             // Act
-            this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), Enumerable.Repeat<EventData>(tempEventData, numEventData).ToArray<EventData>());
+            this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), Enumerable.Repeat<EventData>(tempEventData, numEventData));
 
             // Assert
             this.notificationMock.Verify(e => e.execute(), Times.Exactly(numCalls));
@@ -69,7 +69,7 @@ namespace Services.Test
         [Theory, Trait(Constants.TYPE, Constants.UNIT_TEST)]
         [InlineData(2, 2)]
         [InlineData(0, 0)]
-        public void Should_ReturnAnEnumeratorOverAListOfProperJsonStrings_When_ValidInputJsonStringWithNnumberOfJsonTokens(int numJson, int numReturnJsonString)
+        public void Should_ReturnAListOfProperJsonStrings_When_ValidInputJsonStringWithNnumberOfJsonTokens(int numJson, int numReturnJsonString)
         {
             // Setup
             var tempJson = getSampleJsonRepeatedNTimes(numJson);
@@ -80,17 +80,17 @@ namespace Services.Test
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
-        public void Should_NotCallExecuteMethod_WhenEmptyString()
+        public void Should_NotCallExecuteMethod_WhenEmptyEventData()
         {
             // Setup
-            var tempJson = getSampleJsonRepeatedNTimes(1).Substring(0, getSampleJsonRepeatedNTimes(1).Length - 2);
-            var tempNotificationEventProcessor = new NotificationEventProcessor(this.logMock.Object, this.servicesConfigMock.Object, this.notificationMock.Object);
+            this.notificationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
+            var tempEventDataList = new EventData[] { };
 
             // Act
-            tempNotificationEventProcessor.DeserializeJsonObjectList(tempJson);
+            this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), tempEventDataList);
 
             // Assert
-            this.logMock.Verify(a => a.Info(It.IsAny<string>(), It.IsAny<Action>()), Times.Never);
+            this.notificationMock.Verify(a => a.execute(), Times.Never);
         }
 
         private static byte[] getSamplePayLoadDataWithNalerts(int n)
@@ -117,12 +117,11 @@ namespace Services.Test
                 {"device.id", "213123" },
                 {"device.msg.received", "1234123123123" }
             };
-            var dictionaryList = Enumerable.Repeat<Dictionary<string, object>>(dictionary, n);
-            var jsonDictionary = JsonConvert.SerializeObject(dictionaryList);
 
+            var alertListString = string.Concat(Enumerable.Repeat(JsonConvert.SerializeObject(dictionary), n));
             var binaryFormatter = new BinaryFormatter();
             var memoryStream = new MemoryStream();
-            binaryFormatter.Serialize(memoryStream, jsonDictionary);
+            binaryFormatter.Serialize(memoryStream, alertListString);
             memoryStream.Seek(0, SeekOrigin.Begin);
             return memoryStream.ToArray();
         }

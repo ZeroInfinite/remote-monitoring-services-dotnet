@@ -1,8 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Net;
 using System.Threading.Tasks;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Models;
@@ -16,11 +18,13 @@ namespace Services.Test
     {
         Mock<IImplementationWrapper> implementationWrapperMock;
         Mock<IImplementation> implementationMock;
+        Mock<ILogger> logMock;
 
         public NotificationTest()
         {
             this.implementationWrapperMock = new Mock<IImplementationWrapper>();
             this.implementationMock = new Mock<IImplementation>();
+            this.logMock = new Mock<ILogger>();
         }
 
         [Theory, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -29,12 +33,12 @@ namespace Services.Test
         public void Should_CallExecuteMethodEqualToTheNumberOfCalls_To_TheNumberOfActionItemsInAlert(int numOfActionItems, int numOfCalls)
         {
             // Arrange
-            var tempNotification = new Notification(this.implementationWrapperMock.Object)
+            var tempNotification = new Notification(this.implementationWrapperMock.Object, this.logMock.Object)
             {
                 alarm = this.getSampleAlarmWithnActions(numOfActionItems)
             };
             this.implementationWrapperMock.Setup(a => a.GetImplementationType(It.IsAny<EmailImplementationTypes>())).Returns(this.implementationMock.Object);
-            this.implementationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
+            this.implementationMock.Setup(a => a.execute()).Returns(Task.FromResult<HttpStatusCode>(HttpStatusCode.OK));
 
             // Act
             tempNotification.execute().Wait();
@@ -49,7 +53,7 @@ namespace Services.Test
         public void Should_NotCallExecuteMethod_When_AlertHasNoActions()
         {
             // Arrange
-            var tempNotification = new Notification(this.implementationWrapperMock.Object)
+            var tempNotification = new Notification(this.implementationWrapperMock.Object, this.logMock.Object)
             {
                 alarm = new AlarmNotificationAsaModel()
                 {

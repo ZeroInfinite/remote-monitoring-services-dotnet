@@ -1,9 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Models;
-using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem
 {
@@ -17,13 +18,16 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
     {
         private const EmailImplementationTypes EMAIL_IMPLEMENTATION_TYPE = EmailImplementationTypes.LogicApp;
         private readonly IImplementationWrapper implementationWrapper;
+        private ILogger logger;
         private IImplementation implementation;
        
         public AlarmNotificationAsaModel alarm { get; set; }
 
-        public Notification(IImplementationWrapper implementationWrapper)
+        public Notification(IImplementationWrapper implementationWrapper,
+                            ILogger logger)
         {
             this.implementationWrapper = implementationWrapper;
+            this.logger = logger;
         }
 
         public async Task execute()
@@ -38,8 +42,9 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
                 }
                 implementation.setMessage((string)action.Parameters["Template"], this.alarm.Rule_id, this.alarm.Rule_description);
                 if(action.Parameters["Email"] != null) implementation.setReceiver(((Newtonsoft.Json.Linq.JArray)action.Parameters["Email"]).ToObject<List<string>>());
-
-                await implementation.execute();
+                if (await implementation.execute() == 0){
+                    this.logger.Info("Error executing the action", () => { });
+                } 
             }
         }
     }

@@ -1,10 +1,11 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Http;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation
@@ -55,23 +56,21 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             return "{\"emailAddress\" : " + JArray.FromObject(this.email) + ",\"template\": \"" + emailContent + "\"}";
         }
 
-        public async Task execute()
+        public async Task<HttpStatusCode> execute()
         {
             this.httpRequest.SetUriFromString(this.endointURL);
             string content = this.generatePayLoad();
             this.httpRequest.SetContent(content, Encoding.UTF8, "application/json");
             this.httpRequest.AddHeader("content-type", "application/json");
             // Client library handles Exception.
-            var httpRespose = await this.httpClient.PostAsync(this.httpRequest);
-            if(httpRespose.StatusCode == 0)
-            {
-                this.logger.Info("Error sending request to the LogicApp endpoiint URL", () => new { httpRespose.StatusCode });
-            }
+            return (await this.httpClient.PostAsync(this.httpRequest)).StatusCode;
         }
 
         private string GenerateRuleDetailUrl()
         {
             /*
+             * From the deployment script used in the CLI:
+             * 
              "storageName": {
             "type": "string",
             "defaultValue": "[concat('storage', take(uniqueString(subscription().subscriptionId, resourceGroup().id, parameters('solutionName')), 5))]",
