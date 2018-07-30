@@ -30,10 +30,10 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             this.notification = notification;
         }
 
-        public Task CloseAsync(PartitionContext context, CloseReason reason)
+        public async Task CloseAsync(PartitionContext context, CloseReason reason)
         {
             this.logger.Info($"Notification Event Processor Shutting Down. Partition '{context.PartitionId}', Reason: '{reason}'.", () => { });
-            return Task.CompletedTask;
+            await context.CheckpointAsync();
         }
 
         public Task OpenAsync(PartitionContext context)
@@ -59,10 +59,10 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
                     string temp = JsonConvert.SerializeObject(jsonObject, Formatting.Indented);
                     AlarmNotificationAsaModel alarmNotification = JsonConvert.DeserializeObject<AlarmNotificationAsaModel>(temp);
                     this.notification.alarm = alarmNotification;
-                    await notification.execute();
+                    if (this.notification.alarm.Actions != null) await notification.execute();
                 }
             }
-            await Task.FromResult(0);
+            await context.CheckpointAsync();
         }
 
         public IEnumerable<object> DeserializeJsonObjectList(string json)

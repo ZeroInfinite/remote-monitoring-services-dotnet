@@ -10,6 +10,7 @@ using Microsoft.Azure.EventHubs;
 using Microsoft.Azure.EventHubs.Processor;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Models;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime;
 using Moq;
 using Newtonsoft.Json;
@@ -37,12 +38,13 @@ namespace Services.Test
 
         [Theory, Trait(Constants.TYPE, Constants.UNIT_TEST)]
         [InlineData(2, 2)]
-        [InlineData(0, 0)]
+        [InlineData(1, 1)]
         public void Should_CallExecuteForNTimesEqualToNumberOfJsonTokenInEventData_When_NJsonObjectsInOneEventData(int numJson, int numCalls)
         {
             // Setup
             this.notificationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
             var tempEventData = new EventData(getSamplePayLoadDataWithNalerts(numJson));
+            this.notificationMock.Setup(a => a.alarm).Returns(this.getSampleAction());
 
             // Act
             this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), new EventData[] { tempEventData });
@@ -59,6 +61,7 @@ namespace Services.Test
             // Setup
             this.notificationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
             var tempEventData = new EventData(getSamplePayLoadDataWithNalerts(1));
+            this.notificationMock.Setup(a => a.alarm).Returns(this.getSampleAction());
             // Act
             this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), Enumerable.Repeat<EventData>(tempEventData, numEventData));
 
@@ -153,6 +156,34 @@ namespace Services.Test
             };
             var a = JsonConvert.SerializeObject(dictionary);
             return String.Join("", Enumerable.Repeat<string>(a, n).ToArray());
+        }
+
+        private AlarmNotificationAsaModel getSampleAction()
+        {
+            return new AlarmNotificationAsaModel()
+            {
+                Actions = new List<ActionAsaModel>()
+                {
+                    new ActionAsaModel()
+                    {
+                        ActionType = "Email",
+                        Parameters = new Dictionary<string, object>()
+                        {
+                            {"Subject", "Test Subject" },
+                            {"Email", new Newtonsoft.Json.Linq.JArray() {"email1@outlook.com", "email2@outlook.com"} }
+                        }
+                    }
+                },
+                DateCreated = "",
+                DateModified = "",
+                Device_id = "",
+                Message_received = "",
+                Rule_description = "",
+                Rule_id = "",
+                Rule_severity = ""
+            };
+
+
         }
     }
 }
