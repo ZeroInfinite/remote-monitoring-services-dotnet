@@ -17,7 +17,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
         // Client authentication and authorization configuration
         IClientAuthConfig ClientAuthConfig { get; }
 
-        IBlobStorageConfig blobStorageConfig { get;  }
+        IBlobStorageConfig BlobStorageConfig { get; }
     }
 
     /// <summary>Web service configuration</summary>
@@ -64,7 +64,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
         private const string EVENTHUB_KEY = APPLICATION_KEY + "EventHub:";
         private const string EVENTHUB_CONNECTION_KEY = EVENTHUB_KEY + "connection_string";
         private const string EVENTHUB_NAME = EVENTHUB_KEY + "name";
-        private const string EVENTHUB_OFFSET_IN_MINUTES = EVENTHUB_KEY + "offset_in_minutes";
 
         private const string LOGICAPP_KEY = APPLICATION_KEY + "LogicApp:";
         private const string LOGICAPP_ENDPOINT_URL = LOGICAPP_KEY + "endpoint_url";
@@ -72,7 +71,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
         public int Port { get; }
         public IServicesConfig ServicesConfig { get; }
         public IClientAuthConfig ClientAuthConfig { get; }
-        public IBlobStorageConfig blobStorageConfig { get; }
+        public IBlobStorageConfig BlobStorageConfig { get; }
 
         public Config(IConfigData configData)
         {
@@ -93,7 +92,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
                 StorageAdapterApiTimeout = configData.GetInt(STORAGE_ADAPTER_API_TIMEOUT_KEY),
                 EventHubConnectionString = configData.GetString(EVENTHUB_CONNECTION_KEY),
                 EventHubName = configData.GetString(EVENTHUB_NAME),
-                EventHubOffsetTimeInMinutes = configData.GetInt(EVENTHUB_OFFSET_IN_MINUTES),
                 LogicAppEndPointUrl = configData.GetString(LOGICAPP_ENDPOINT_URL),
                 // Work around for accessing the solution name, storage account name set to 
                 // Solution name by default. 
@@ -116,7 +114,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
                 JwtClockSkew = TimeSpan.FromSeconds(configData.GetInt(JWT_CLOCK_SKEW_KEY, 120)),
             };
 
-            this.blobStorageConfig = new BlobStorageConfig
+            this.BlobStorageConfig = new BlobStorageConfig
             {
                 AccountKey = configData.GetString(STORAGE_ACCOUNT_KEY_KEY),
                 AccountName = configData.GetString(STORAGE_ACCOUNT_NAME_KEY),

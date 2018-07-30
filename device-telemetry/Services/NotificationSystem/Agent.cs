@@ -59,11 +59,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
                         this.servicesConfig.EventHubConnectionString,
                         storageConnectionString,
                         this.blobStorageConfig.EventHubContainer);
-                    eventProcessorOptions = new EventProcessorOptions
-                    {
-                        InitialOffsetProvider = (partitionId) => EventPosition.FromEnqueuedTime(DateTime.UtcNow.AddMinutes(0 - this.servicesConfig.EventHubOffsetTimeInMinutes))
-                    };
-                    await this.eventProcessorHostWrapper.RegisterEventProcessorFactoryAsync(eventProcessorHost, this.notificationEventProcessorFactory, eventProcessorOptions);
+                    await this.eventProcessorHostWrapper.RegisterEventProcessorFactoryAsync(eventProcessorHost, this.notificationEventProcessorFactory);
                 }
                 catch (Exception e)
                 {

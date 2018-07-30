@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation
 {
-    public class LogicApp : IImplementation
+    public class LogicApp : INotificationImplementation
     {
         private readonly IHttpClient httpClient;
         private readonly IHttpRequest httpRequest;

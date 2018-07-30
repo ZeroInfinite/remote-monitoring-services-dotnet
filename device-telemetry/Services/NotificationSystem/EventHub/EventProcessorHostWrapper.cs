@@ -15,8 +15,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             string leaseContainerName);
 
         Task RegisterEventProcessorFactoryAsync(EventProcessorHost host, IEventProcessorFactory factory);
-
-        Task RegisterEventProcessorFactoryAsync(EventProcessorHost host, IEventProcessorFactory factory, EventProcessorOptions options);
     }
 
     public class EventProcessorHostWrapper : IEventProcessorHostWrapper
@@ -34,11 +32,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         public Task RegisterEventProcessorFactoryAsync(EventProcessorHost host, IEventProcessorFactory factory)
         {
             return host.RegisterEventProcessorFactoryAsync(factory);
-        }
-
-        public Task RegisterEventProcessorFactoryAsync(EventProcessorHost host, IEventProcessorFactory factory, EventProcessorOptions options)
-        {
-            return host.RegisterEventProcessorFactoryAsync(factory, options);
         }
     }
 }

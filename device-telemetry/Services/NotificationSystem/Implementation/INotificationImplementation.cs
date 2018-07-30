@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem.Implementation
 {
-    public interface IImplementation
+    public interface INotificationImplementation
     {
         void setReceiver(List<string> receivers);
         void setMessage(string message, string ruleId, string ruleDescription);

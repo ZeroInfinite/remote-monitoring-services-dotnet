@@ -89,7 +89,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService
 
         private void StartAgents()
         {
-
             this.notificationSystemAgent = this.ApplicationContainer.Resolve<IAgent>();
             this.notificationSystemAgent.RunAsync(this.agentsRunState.Token);
         }

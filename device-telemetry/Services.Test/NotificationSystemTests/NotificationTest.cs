@@ -17,13 +17,13 @@ namespace Services.Test
     public class NotificationTest
     {
         Mock<IImplementationWrapper> implementationWrapperMock;
-        Mock<IImplementation> implementationMock;
+        Mock<INotificationImplementation> implementationMock;
         Mock<ILogger> logMock;
 
         public NotificationTest()
         {
             this.implementationWrapperMock = new Mock<IImplementationWrapper>();
-            this.implementationMock = new Mock<IImplementation>();
+            this.implementationMock = new Mock<INotificationImplementation>();
             this.logMock = new Mock<ILogger>();
         }
 

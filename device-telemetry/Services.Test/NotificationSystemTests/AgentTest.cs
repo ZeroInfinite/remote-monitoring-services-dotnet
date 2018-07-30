@@ -51,7 +51,7 @@ namespace Services.Test
 
             // Assert
             this.eventProcessorHostWrapperMock.Verify(a => a.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(),
-                It.IsAny<IEventProcessorFactory>(), It.IsAny<EventProcessorOptions>()), Times.Once);
+                It.IsAny<IEventProcessorFactory>()), Times.Once);
 
         }
 
@@ -60,15 +60,14 @@ namespace Services.Test
         {
             // Arrange
             this.runState = this.agentsRunState.Token;
-            this.eventProcessorHostWrapperMock.Setup(x => x.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(), It.IsAny<IEventProcessorFactory>(),
-                It.IsAny<EventProcessorOptions>())).Returns(Task.FromException(new Exception()));
+            this.eventProcessorHostWrapperMock.Setup(x => x.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(), It.IsAny<IEventProcessorFactory>())).Returns(Task.FromException(new Exception()));
 
             // Act
             this.notificationSystemAgent.RunAsync(this.runState);
 
             // Assert
             Assert.ThrowsAsync<Exception>(() => this.eventProcessorHostWrapperMock.Object.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(),
-                It.IsAny<IEventProcessorFactory>(), It.IsAny<EventProcessorOptions>()));
+                It.IsAny<IEventProcessorFactory>()));
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]

@@ -9,7 +9,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 {
     public interface IImplementationWrapper
     {
-        IImplementation GetImplementationType(EmailImplementationTypes actionType);
+        INotificationImplementation GetImplementationType(EmailImplementationTypes actionType);
     }
 
     public class ImplementationWraper : IImplementationWrapper
@@ -27,7 +27,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             this.httpRequest = httpRequest;
         }
 
-        public IImplementation GetImplementationType(EmailImplementationTypes actionType)
+        public INotificationImplementation GetImplementationType(EmailImplementationTypes actionType)
         {
             switch (actionType)
             {

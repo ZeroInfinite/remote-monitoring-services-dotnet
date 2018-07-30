@@ -19,7 +19,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         private const EmailImplementationTypes EMAIL_IMPLEMENTATION_TYPE = EmailImplementationTypes.LogicApp;
         private readonly IImplementationWrapper implementationWrapper;
         private ILogger logger;
-        private IImplementation implementation;
+        private INotificationImplementation implementation;
 
         public AlarmNotificationAsaModel alarm { get; set; }
 
