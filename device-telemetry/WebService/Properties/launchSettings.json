@@ -13,13 +13,13 @@
       "launchBrowser": true,
       "launchUrl": "http://localhost:9004/v1/status",
       "environmentVariables": {
-        "PCS_TELEMETRY_EVENTHUB_CONNSTRING": "Endpoint=sb://eventhubnamespace-57gel.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=qviTlYSUR/eRMdIPk0q5o00gOfEvTwBBJN0fxv7noIw=",
-        "PCS_TELEMETRY_DATA_AZUREBLOB_KEY": "f9ymRP9/C13X+e4+4+UEy2e7+gyjIQg5WjyNV7yXxXkDX6Qp5P80GHSOv9F70NLwW7nIh4CcJ33nopXe7WC35Q==",
+        "PCS_TELEMETRY_EVENTHUB_CONNSTRING": "Endpoint=sb://eventhubnamespace-f3pvd.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=x1gTQuuYPsSjr24RhSuqioZKZgUkpzTwWqvJGgURxLU=",
+        "PCS_TELEMETRY_DATA_AZUREBLOB_KEY": "qIFS9KOWkR+GUymNElgeGGQhwvATW5SNRii4R4OTWYi0aiT/JrIFnnLyJlUVigyIoNzr5TR9utGwZoK2ffioAw==",
         "PCS_STORAGEADAPTER_WEBSERVICE_URL": "http://localhost:9022/v1",
-        "PCS_TELEMETRY_DATA_AZUREBLOB_ACCOUNT": "storage57gel",
-        "PCS_TELEMETRY_EVENTHUB_NAME": "notificationsystemeventhub-57gel",
-        "PCS_TELEMETRY_LOGICAPP_ENDPOINT_URL": "https://prod-11.westeurope.logic.azure.com:443/workflows/cfd50e7c39b747b28b48c88c354eefce/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=j9B4eYmGYTgHi3Q_HG9mgaZJ6zRWyKoHhe77GrOw8wQ",
-        "PCS_TELEMETRY_DOCUMENTDB_CONNSTRING": "AccountEndpoint=https://documentdb-57gel.documents.azure.com:443/;AccountKey=jyLBIz6fU2BOuCCT47MpceQ3XOiusBwkAfqhDDpQEMS7Ipxnm2zTeiMY2DCFQzZ8NF2a226mdhB7e9niJqd7Yw==;"
+        "PCS_TELEMETRY_DATA_AZUREBLOB_ACCOUNT": "aayushdemo",
+        "PCS_TELEMETRY_EVENTHUB_NAME": "notificationsystem",
+        "PCS_TELEMETRY_LOGICAPP_ENDPOINT_URL": "https://prod-00.southeastasia.logic.azure.com:443/workflows/1f2493004aea43e1ac661f071a15f330/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DIfPL17M7qydXwHxD7g-_K-P3mE6dqYuv7aDfbQji94",
+        "PCS_TELEMETRY_DOCUMENTDB_CONNSTRING": "AccountEndpoint=https://aayushdemo3475c.documents.azure.com:443/;AccountKey=Ki3tiv6Z2u4mcbr5A8XcijuYAA8KVxT3GATCgM84IAR6oDgIOQMrryAJzF581hILbkM9gyiHEk4bzBrZ1IIopA==;"
       }
     },
     "WebService": {

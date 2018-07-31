@@ -38,7 +38,7 @@ namespace Services.Test
 
         [Theory, Trait(Constants.TYPE, Constants.UNIT_TEST)]
         [InlineData(2, 2)]
-        [InlineData(1, 1)]
+        [InlineData(0, 0)]
         public void Should_CallExecuteForNTimesEqualToNumberOfJsonTokenInEventData_When_NJsonObjectsInOneEventData(int numJson, int numCalls)
         {
             // Setup
