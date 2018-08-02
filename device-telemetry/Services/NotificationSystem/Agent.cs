@@ -23,7 +23,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         private readonly IEventProcessorFactory notificationEventProcessorFactory;
         private readonly IEventProcessorHostWrapper eventProcessorHostWrapper;
 
-        private EventProcessorOptions eventProcessorOptions;
         private CancellationToken runState;
 
         public Agent(ILogger logger,

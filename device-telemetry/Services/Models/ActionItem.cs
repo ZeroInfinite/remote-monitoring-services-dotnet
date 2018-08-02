@@ -33,7 +33,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models
         public Type Type { get; set; }
 
         public IDictionary<string, object> Parameters { get; set; } = new Dictionary<string, object>();
-      
+
         public EmailActionItem() { }
 
         public EmailActionItem(Type type, IDictionary<string, object> parameters)

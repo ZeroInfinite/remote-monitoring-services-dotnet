@@ -26,6 +26,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
         private const string APPLICATION_KEY = "TelemetryService:";
         private const string PORT_KEY = APPLICATION_KEY + "webservice_port";
         private const string STORAGE_TYPE_KEY = APPLICATION_KEY + "storage_type";
+        private const string SOLUTION_NAME_KEY = APPLICATION_KEY + "solution_name";
 
         private const string DOCUMENTDB_KEY = "TelemetryService:DocumentDb:";
         private const string DOCUMENTDB_CONNSTRING_KEY = DOCUMENTDB_KEY + "connstring";
@@ -93,9 +94,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
                 EventHubConnectionString = configData.GetString(EVENTHUB_CONNECTION_KEY),
                 EventHubName = configData.GetString(EVENTHUB_NAME),
                 LogicAppEndPointUrl = configData.GetString(LOGICAPP_ENDPOINT_URL),
-                // Work around for accessing the solution name, storage account name set to 
-                // Solution name by default. 
-                SolutionName = configData.GetString(STORAGE_ACCOUNT_NAME_KEY)
+                SolutionName = configData.GetString(SOLUTION_NAME_KEY)
             };
 
             this.ClientAuthConfig = new ClientAuthConfig

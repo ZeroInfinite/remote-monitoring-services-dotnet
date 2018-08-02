@@ -9,19 +9,30 @@ in the different contexts.
 
 ## Mandatory Settings
 
-* `PCS_TELEMETRY_DOCUMENTDB_CONNSTRING` [mandatory]: contains the full connection string required to connect the telemetry to the Document DB in the Azure cloud, where the Rules, Messages and the Alarms are stored.
+* `PCS_TELEMETRY_DOCUMENTDB_CONNSTRING` [mandatory]: contains the full connection
+string required to connect the telemetry to the Document DB in the Azure cloud, 
+where the Rules, Messages and the Alarms are stored.
 
-* `PCS_STORAGEADAPTER_WEBSERVICE_URL` [mandatory]: the URL where the storage adapter service is available, e.g. `http://127.0.0.1:9022`
+* `PCS_STORAGEADAPTER_WEBSERVICE_URL` [mandatory]: the URL where the storage 
+adapter service is available, e.g. `http://127.0.0.1:9022`
 
-* `PCS_TELEMETRY_EVENTHUB_CONNSTRING`: [mandatory]:contains the full connection string required to connect the service to the EventHub.
+* `PCS_TELEMETRY_EVENTHUB_CONNSTRING`: [mandatory]:contains the full connection 
+string required to connect the service to the EventHub.
 
-* `PCS_TELEMETRY_EVENTHUB_NAME`: [mandatory]: the name of the eventhub used for notification system in the telemetry service.
+* `PCS_TELEMETRY_EVENTHUB_NAME`: [mandatory]: the name of the eventhub used 
+for notification system in the telemetry service.
 
-* `PCS_TELEMETRY_DATA_AZUREBLOB_ACCOUNT`: [mandatory]: blob storage account used for storing checkpointing data for the eventhub used for notification system.
+* `PCS_TELEMETRY_DATA_AZUREBLOB_ACCOUNT`: [mandatory]: blob storage account 
+used for storing checkpointing data for the eventhub used in the notification system.
 
-* `PCS_TELEMETRY_DATA_AZUREBLOB_KEY`: [mandatory]: blob storage key used for storing checkpointing data for the eventhub used for notification system.
+* `PCS_TELEMETRY_DATA_AZUREBLOB_KEY`: [mandatory]: blob storage key used 
+for storing checkpointing data for the eventhub used in the notification system.
 
-* `PCS_TELEMETRY_LOGICAPP_ENDPOINT_URL`: [mandatory]: logic app end point URL used to send email actions for Notification system.
+* `PCS_TELEMETRY_LOGICAPP_ENDPOINT_URL`: [mandatory]: logic app end point
+URL used to send email actions for Notification system.
+
+* `PCS_SOLUTION_NAME`: [mandatory]: Solution name used to generate URL
+for email notifications.
 
 ## Optional Settings
 

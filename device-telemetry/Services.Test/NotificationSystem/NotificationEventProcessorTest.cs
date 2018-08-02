@@ -19,6 +19,16 @@ using Xunit;
 
 namespace Services.Test.NotificationSystem
 {
+    /*
+     * Event Data is an array of bytes. ProcessEventsAsync method takes in an Enumerable of EventData.
+     * So, tests for ProcessEventsAsync method are designed as follows:
+     * 
+     * 1. When one event data has N json strings, check if number of calls to execute method same as number of Json Strings.
+     * 2. When N event data, each with 1 json string, check if number of calls to execute method same as number of Event Data.
+     * 3. When empty event data, should not call execute method.
+     * 4. When N event data has M json strings, check if number of calls to execute method same as N*M number of Json strings. 
+     * 
+    */
     public class NotificationEventProcessorTest
     {
         private readonly Mock<INotification> notificationMock;
@@ -62,6 +72,7 @@ namespace Services.Test.NotificationSystem
             this.notificationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
             var tempEventData = new EventData(getSamplePayLoadDataWithNalerts(1));
             this.notificationMock.Setup(a => a.alarm).Returns(this.getSampleAction());
+
             // Act
             this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), Enumerable.Repeat<EventData>(tempEventData, numEventData));
 
@@ -96,6 +107,39 @@ namespace Services.Test.NotificationSystem
             this.notificationMock.Verify(a => a.execute(), Times.Never);
         }
 
+        [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
+        public void Should_NotCallExecuteMethod_When_AlertObjectHasEmptyActions()
+        {
+            // Setup
+            this.notificationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
+            var tempEventDataWithOutActions = new EventData(getSamplePayLoadDataWithOutActions());
+
+            // Act
+            this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), new EventData[] { tempEventDataWithOutActions });
+
+            // Assert
+            this.notificationMock.Verify(e => e.execute(), Times.Never);
+        }
+
+        [Theory, Trait(Constants.TYPE, Constants.UNIT_TEST)]
+        [InlineData(2, 3, 6)]
+        [InlineData(1, 1, 1)]
+        [InlineData(2, 2, 4)]
+        [InlineData(0, 0, 0)]
+        public void Should_CallExecuteNxMTimes_When_NEventDataWithMJsonObjectEach(int numEventData, int numJsonString, int numOfCallsToExecuteMethod)
+        {
+            // Setup
+            this.notificationMock.Setup(a => a.execute()).Returns(Task.CompletedTask);
+            var tempEventData = new EventData(getSamplePayLoadDataWithNalerts(numJsonString));
+            this.notificationMock.Setup(a => a.alarm).Returns(this.getSampleAction());
+
+            // Act
+            this.notificationEventProcessor.ProcessEventsAsync(It.IsAny<PartitionContext>(), Enumerable.Repeat<EventData>(tempEventData, numEventData));
+
+            // Assert
+            this.notificationMock.Verify(e => e.execute(), Times.Exactly(numOfCallsToExecuteMethod));
+        }
+
         private static byte[] getSamplePayLoadDataWithNalerts(int n)
         {
             var dictionary = new Dictionary<string, object>()
@@ -108,12 +152,12 @@ namespace Services.Test.NotificationSystem
                 {"rule.actions", new List<object>()
                 {
                     new Dictionary<string, object>(){
-                    {"Type", "Email" },
-                    {"Parameters", new Dictionary<string, object>(){
-                        {"Template", "This is a test email."},
-                        {"Email", new List<string>(){ "agupta.aayush8484@gmail.com", "t-aagupt@microsoft.com" } }
-                    }
-                    }
+                        {"Type", "Email" },
+                        {"Parameters", new Dictionary<string, object>(){
+                            {"Template", "This is a test email."},
+                            {"Email", new List<string>(){ "agupta.aayush8484@gmail.com", "t-aagupt@microsoft.com" } }
+                        }
+                        }
                 }
                 }
                 },
@@ -183,8 +227,26 @@ namespace Services.Test.NotificationSystem
                 Rule_id = "",
                 Rule_severity = ""
             };
+        }
 
-
+        private static byte[] getSamplePayLoadDataWithOutActions()
+        {
+            var dictionary = new Dictionary<string, object>()
+            {
+                {"created", "342874237482374" },
+                {"modified", "1234123123123" },
+                {"rule.description", "Pressure > 380 Aayush" },
+                {"rule.severity", "Critical" },
+                {"rule.id", "12345" },
+                {"rule.actions", null },
+                {"device.id", "213123" },
+                {"device.msg.received", "1234123123123" }
+            };
+            var binaryFormatter = new BinaryFormatter();
+            var memoryStream = new MemoryStream();
+            binaryFormatter.Serialize(memoryStream, JsonConvert.SerializeObject(dictionary));
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            return memoryStream.ToArray();
         }
     }
 }

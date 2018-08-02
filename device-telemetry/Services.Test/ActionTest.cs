@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Exceptions;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models;
+using Newtonsoft.Json.Linq;
 using Services.Test.helpers;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Services.Test
         private const string PARAM_TEMPLATE = "Chiller pressure is at 250 which is high";
         private const string PARAM_SUBJECT = "Alert Notification";
         private const string PARAM_EMAIL = "sampleEmail@gmail.com";
-        private const string PARAM_SUBJECT_KEY = "Subjec";
+        private const string PARAM_SUBJECT_KEY = "Subject";
         private const string PARAM_TEMPLATE_KEY = "Template";
         private const string PARAM_EMAIL_KEY = "Email";
 
@@ -26,11 +27,11 @@ namespace Services.Test
             {
                 {PARAM_SUBJECT_KEY, PARAM_SUBJECT},
                 {PARAM_TEMPLATE_KEY, PARAM_TEMPLATE},
-                {PARAM_EMAIL_KEY, new Newtonsoft.Json.Linq.JArray() { PARAM_EMAIL} }
+                {PARAM_EMAIL_KEY, new JArray() { PARAM_EMAIL} }
             };
 
             // Act 
-            var targetAction = new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters);
+            var targetAction = new EmailActionItem(Type.Email, parameters);
 
             // Assert 
             Assert.True(this.IsEmailActionItemReadProperly(targetAction));
@@ -48,7 +49,7 @@ namespace Services.Test
             };
 
             // Act and Assert
-            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters));
+            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Type.Email, parameters));
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -62,7 +63,7 @@ namespace Services.Test
             };
 
             // Act and Assert
-            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters));
+            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Type.Email, parameters));
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -77,7 +78,7 @@ namespace Services.Test
             };
 
             // Act and Assert
-            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters));
+            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Type.Email, parameters));
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -88,11 +89,11 @@ namespace Services.Test
             {
                 {PARAM_SUBJECT_KEY, PARAM_SUBJECT},
                 {"tEmPlate", PARAM_TEMPLATE},
-                {"eMail", new Newtonsoft.Json.Linq.JArray() { PARAM_EMAIL} }
+                {"eMail", new JArray() { PARAM_EMAIL} }
             };
 
             // Act 
-            var targetAction = new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters);
+            var targetAction = new EmailActionItem(Type.Email, parameters);
 
             // Assert 
             Assert.True(this.IsEmailActionItemReadProperly(targetAction));
@@ -100,14 +101,14 @@ namespace Services.Test
 
         private bool IsEmailActionItemReadProperly(EmailActionItem emailActionItem)
         {
-            return emailActionItem.Type == Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email
+            return emailActionItem.Type == Type.Email
                 && string.Equals(emailActionItem.Parameters[PARAM_TEMPLATE_KEY], PARAM_TEMPLATE)
                 && this.IsListOfEmailEqual((List<string>)emailActionItem.Parameters[PARAM_EMAIL_KEY]);
         }
 
         private bool IsListOfEmailEqual(IList<string> emailList)
         {
-            var checkList = new Newtonsoft.Json.Linq.JArray() { PARAM_EMAIL };
+            var checkList = new JArray() { PARAM_EMAIL };
             foreach (var email in checkList)
             {
                 if (!emailList.Contains((string)email)) return false;

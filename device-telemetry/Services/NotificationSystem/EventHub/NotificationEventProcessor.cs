@@ -44,7 +44,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 
         public Task ProcessErrorAsync(PartitionContext context, Exception error)
         {
-            this.logger.Info($"Error on Partition: {context.PartitionId}, Error: {error.Message}", () => { });
+            this.logger.Error($"Error on Partition: {context.PartitionId}, Error: {error.Message}", () => { });
             return Task.CompletedTask;
         }
 

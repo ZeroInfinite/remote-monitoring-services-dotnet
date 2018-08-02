@@ -52,11 +52,10 @@ namespace Services.Test.NotificationSystem
             // Assert
             this.eventProcessorHostWrapperMock.Verify(a => a.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(),
                 It.IsAny<IEventProcessorFactory>()), Times.Once);
-
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
-        public void Should_ThrowExceptionAndWriteErrorToTheLogger_When_InvalidCredentialsPassedToRegisterEventProcessorFactory()
+        public void Should_ThrowException_When_InvalidCredentialsPassedToRegisterEventProcessorFactory()
         {
             // Arrange
             this.runState = this.agentsRunState.Token;
@@ -85,7 +84,6 @@ namespace Services.Test.NotificationSystem
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             this.eventProcessorHostWrapperMock.Verify(a => a.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(),
                 It.IsAny<IEventProcessorFactory>()), Times.Never);
-
         }
     }
 }

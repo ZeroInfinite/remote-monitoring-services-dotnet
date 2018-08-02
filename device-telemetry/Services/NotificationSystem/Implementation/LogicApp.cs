@@ -18,7 +18,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 
         private string endointURL;
         private string content;
-        private List<string> email;
+        private List<string> emailList;
         private string ruleId;
         private string ruleDescription;
         private string solutionName;
@@ -30,11 +30,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             this.httpClient = httpClient;
             this.httpRequest = httpRequest;
             this.logger = logger;
-
-            // Default for other parameters:
-            this.content = "";
-            this.ruleId = "";
-            this.ruleDescription = "";
         }
 
         public void SetMessage(string message, string ruleId, string ruleDescription)
@@ -44,9 +39,9 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             this.ruleDescription = ruleDescription;
         }
 
-        public void SetReceiver(List<string> receiver)
+        public void SetReceiver(List<string> receivers)
         {
-            this.email = receiver;
+            this.emailList = receivers;
         }
 
         public async Task<HttpStatusCode> Execute()
@@ -68,7 +63,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
         {
             var emailContent = "Alarm fired for rule ID: " + this.ruleId + "  Rule Description: " +
                 this.ruleDescription + " Custom Message: " + this.content + "Alarm Detail Page: " + this.GenerateRuleDetailUrl();
-            return "{\"emailAddress\" : " + JArray.FromObject(this.email) + ",\"template\": \"" + emailContent + "\"}";
+            return "{\"emailAddress\" : " + JArray.FromObject(this.emailList) + ",\"template\": \"" + emailContent + "\"}";
         }
     }
 }

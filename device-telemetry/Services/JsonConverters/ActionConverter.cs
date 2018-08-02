@@ -31,7 +31,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.JsonConverters
             IList<IActionItem> actionItemList = new List<IActionItem>();
             foreach (var jsonObject in jsonArray)
             {
-                Enum.TryParse<Services.Models.Type>(jsonObject["Type"].Value<string>(), true, out Services.Models.Type action);
+                Enum.TryParse(jsonObject["Type"].Value<string>(), true, out Models.Type action);
                 actionItem = actionMapping[action]();
                 serializer.Populate(jsonObject.CreateReader(), actionItem);
                 actionItemList.Add(actionItem);
