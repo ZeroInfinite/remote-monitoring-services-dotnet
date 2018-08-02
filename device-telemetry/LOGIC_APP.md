@@ -16,3 +16,4 @@ Below is a designer view of how the Logic App has been laid out:
 ## Modifications
 
 The Logic App can be modified to perform actions depending on custom use case. 
+Logic App supports various other actions. Refer to this website: https://docs.microsoft.com/en-us/azure/logic-apps/ for more information. 

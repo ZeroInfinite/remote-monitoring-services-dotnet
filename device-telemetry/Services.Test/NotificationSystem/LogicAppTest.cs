@@ -11,13 +11,15 @@ using Moq;
 using Services.Test.helpers;
 using Xunit;
 
-namespace Services.Test
+namespace Services.Test.NotificationSystem
 {
     public class LogicAppTest
     {
         private readonly Mock<ILogger> logMock;
         private readonly Mock<IHttpRequest> httpRequestMock;
         private readonly Mock<IHttpClient> httpClientMock;
+
+        private LogicApp tempLogicApp;
 
         public LogicAppTest()
         {
@@ -30,34 +32,33 @@ namespace Services.Test
         public void Should_ReturnInvalidRequestStatusCode_WhenInValidEndPointUrl()
         {
             // Setup
-            var tempLogicApp = new LogicApp(It.IsAny<string>(), It.IsAny<string>(),
+            tempLogicApp = new LogicApp(It.IsAny<string>(), It.IsAny<string>(),
                 this.httpRequestMock.Object, this.httpClientMock.Object, this.logMock.Object);
+            tempLogicApp.SetReceiver(new List<string>() { It.IsAny<string>() });
             this.httpClientMock.Setup(x => x.PostAsync(It.IsAny<IHttpRequest>())).Returns(
                 Task.FromResult<IHttpResponse>(new HttpResponse(0, It.IsAny<string>(), It.IsAny<HttpResponseHeaders>())));
-            tempLogicApp.setReceiver(new List<string>() { It.IsAny<string>() });
 
             // Act
-            var a = tempLogicApp.execute().Result;
+            var logicAppRequestStatusCode = tempLogicApp.Execute().Result;
 
-            // Assert => Logger value same :( 
-            Assert.Equal<HttpStatusCode>(0, a);
+            Assert.Equal<HttpStatusCode>(0, logicAppRequestStatusCode);
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
         public void Should_ReturnOkStatusCode_When_ValidEndPointUrl()
         {
             // Setup
-            var tempLogicApp = new LogicApp(It.IsAny<string>(), It.IsAny<string>(),
+            tempLogicApp = new LogicApp(It.IsAny<string>(), It.IsAny<string>(),
                 this.httpRequestMock.Object, this.httpClientMock.Object, this.logMock.Object);
-            tempLogicApp.setReceiver(new List<string>() { It.IsAny<string>() });
+            tempLogicApp.SetReceiver(new List<string>() { It.IsAny<string>() });
             this.httpClientMock.Setup(x => x.PostAsync(It.IsAny<IHttpRequest>())).Returns(
                 Task.FromResult<IHttpResponse>(new HttpResponse(System.Net.HttpStatusCode.OK, It.IsAny<string>(), It.IsAny<HttpResponseHeaders>())));
 
             // Act
-            var a = tempLogicApp.execute().Result;
+            var logicAppRequestStatusCode = tempLogicApp.Execute().Result;
 
             // Assert
-            Assert.Equal<HttpStatusCode>(HttpStatusCode.OK, a);
+            Assert.Equal<HttpStatusCode>(HttpStatusCode.OK, logicAppRequestStatusCode);
         }
 
     }

@@ -38,6 +38,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             this.notificationEventProcessorFactory = notificationEventProcessorFactory;
             this.eventProcessorHostWrapper = eventProcessorHostWrapper;
         }
+
         public async Task RunAsync(CancellationToken runState)
         {
             this.runState = runState;

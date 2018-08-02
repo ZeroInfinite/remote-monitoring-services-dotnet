@@ -8,8 +8,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 {
     public interface INotificationImplementation
     {
-        void setReceiver(List<string> receivers);
-        void setMessage(string message, string ruleId, string ruleDescription);
-        Task<HttpStatusCode> execute();
+        void SetReceiver(List<string> receivers);
+        void SetMessage(string message, string ruleId, string ruleDescription);
+        Task<HttpStatusCode> Execute();
     }
 }

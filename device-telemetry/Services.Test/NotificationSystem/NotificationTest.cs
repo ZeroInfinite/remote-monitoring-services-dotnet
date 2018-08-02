@@ -12,7 +12,7 @@ using Moq;
 using Services.Test.helpers;
 using Xunit;
 
-namespace Services.Test
+namespace Services.Test.NotificationSystem
 {
     public class NotificationTest
     {
@@ -35,18 +35,18 @@ namespace Services.Test
             // Arrange
             var tempNotification = new Notification(this.implementationWrapperMock.Object, this.logMock.Object)
             {
-                alarm = this.getSampleAlarmWithnActions(numOfActionItems)
+                alarm = this.getSampleAlarmWithNActions(numOfActionItems)
             };
             this.implementationWrapperMock.Setup(a => a.GetImplementationType(It.IsAny<EmailImplementationTypes>())).Returns(this.implementationMock.Object);
-            this.implementationMock.Setup(a => a.execute()).Returns(Task.FromResult<HttpStatusCode>(HttpStatusCode.OK));
+            this.implementationMock.Setup(a => a.Execute()).Returns(Task.FromResult<HttpStatusCode>(HttpStatusCode.OK));
 
             // Act
             tempNotification.execute().Wait();
 
             // Assert
-            this.implementationMock.Verify(a => a.execute(), Times.Exactly(numOfCalls));
-            this.implementationMock.Verify(a => a.setMessage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(numOfCalls));
-            this.implementationMock.Verify(a => a.setReceiver(It.IsAny<List<string>>()), Times.Exactly(numOfCalls));
+            this.implementationMock.Verify(a => a.Execute(), Times.Exactly(numOfCalls));
+            this.implementationMock.Verify(a => a.SetMessage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(numOfCalls));
+            this.implementationMock.Verify(a => a.SetReceiver(It.IsAny<List<string>>()), Times.Exactly(numOfCalls));
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -65,12 +65,12 @@ namespace Services.Test
             tempNotification.execute().Wait();
 
             // Assert
-            this.implementationMock.Verify(a => a.execute(), Times.Never);
-            this.implementationMock.Verify(a => a.setMessage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            this.implementationMock.Verify(a => a.setReceiver(It.IsAny<List<string>>()), Times.Never);
+            this.implementationMock.Verify(a => a.Execute(), Times.Never);
+            this.implementationMock.Verify(a => a.SetMessage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            this.implementationMock.Verify(a => a.SetReceiver(It.IsAny<List<string>>()), Times.Never);
         }
 
-        private AlarmNotificationAsaModel getSampleAlarmWithnActions(int n)
+        private AlarmNotificationAsaModel getSampleAlarmWithNActions(int n)
         {
             return new AlarmNotificationAsaModel()
             {

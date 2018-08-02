@@ -17,7 +17,7 @@ using Newtonsoft.Json;
 using Services.Test.helpers;
 using Xunit;
 
-namespace Services.Test
+namespace Services.Test.NotificationSystem
 {
     public class NotificationEventProcessorTest
     {
@@ -79,7 +79,7 @@ namespace Services.Test
             var tempNotificationEventProcessor = new NotificationEventProcessor(this.logMock.Object, this.servicesConfigMock.Object, this.notificationMock.Object);
 
             // Act and Assert
-            Assert.Equal(tempNotificationEventProcessor.DeserializeJsonObjectList(tempJson).ToArray().Length, numReturnJsonString);
+            Assert.Equal(tempNotificationEventProcessor.GetAlertListFromString(tempJson).ToArray().Length, numReturnJsonString);
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -140,13 +140,14 @@ namespace Services.Test
                 {"rule.id", "12345" },
                 {"rule.actions", new List<object>()
                 {
-                    new Dictionary<string, object>(){
-                    {"Type", "Email" },
-                    {"Parameters", new Dictionary<string, object>(){
-                        {"Template", "This is a test email."},
-                        {"Email", new List<string>(){ "agupta.aayush8484@gmail.com", "t-aagupt@microsoft.com" } }
-                    }
-                    }
+                    new Dictionary<string, object>()
+                    {
+                        {"Type", "Email" },
+                        {"Parameters", new Dictionary<string, object>(){
+                            {"Template", "This is a test email."},
+                            {"Email", new List<string>(){ "agupta.aayush8484@gmail.com", "t-aagupt@microsoft.com" } }
+                        }
+                        }
                 }
                 }
                 },
@@ -154,8 +155,8 @@ namespace Services.Test
                 {"device.msg.received", "1234123123123" }
 
             };
-            var a = JsonConvert.SerializeObject(dictionary);
-            return String.Join("", Enumerable.Repeat<string>(a, n).ToArray());
+            var jsonString = JsonConvert.SerializeObject(dictionary);
+            return String.Join("", Enumerable.Repeat<string>(jsonString, n).ToArray());
         }
 
         private AlarmNotificationAsaModel getSampleAction()

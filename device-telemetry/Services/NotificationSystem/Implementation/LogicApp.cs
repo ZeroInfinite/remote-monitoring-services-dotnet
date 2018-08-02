@@ -37,29 +37,22 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             this.ruleDescription = "";
         }
 
-        public void setMessage(string message, string ruleId, string ruleDescription)
+        public void SetMessage(string message, string ruleId, string ruleDescription)
         {
             this.content = message;
             this.ruleId = ruleId;
             this.ruleDescription = ruleDescription;
         }
 
-        public void setReceiver(List<string> receiver)
+        public void SetReceiver(List<string> receiver)
         {
             this.email = receiver;
         }
 
-        private string generatePayLoad()
-        {
-            var emailContent = "Alarm fired for rule ID: " + this.ruleId + "  Rule Description: " +
-                this.ruleDescription + " Custom Message: " + this.content + "Alarm Detail Page: " + this.GenerateRuleDetailUrl();
-            return "{\"emailAddress\" : " + JArray.FromObject(this.email) + ",\"template\": \"" + emailContent + "\"}";
-        }
-
-        public async Task<HttpStatusCode> execute()
+        public async Task<HttpStatusCode> Execute()
         {
             this.httpRequest.SetUriFromString(this.endointURL);
-            string content = this.generatePayLoad();
+            string content = this.GeneratePayLoad();
             this.httpRequest.SetContent(content, Encoding.UTF8, "application/json");
             this.httpRequest.AddHeader("content-type", "application/json");
             // Client library handles Exception.
@@ -81,6 +74,13 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
             // Work around, can set an environment variable. 
              */
             return "https://" + this.solutionName + ".azurewebsites.net/maintenance/rule/" + this.ruleId;
+        }
+
+        private string GeneratePayLoad()
+        {
+            var emailContent = "Alarm fired for rule ID: " + this.ruleId + "  Rule Description: " +
+                this.ruleDescription + " Custom Message: " + this.content + "Alarm Detail Page: " + this.GenerateRuleDetailUrl();
+            return "{\"emailAddress\" : " + JArray.FromObject(this.email) + ",\"template\": \"" + emailContent + "\"}";
         }
     }
 }

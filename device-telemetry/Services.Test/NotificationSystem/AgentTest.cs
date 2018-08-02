@@ -11,7 +11,7 @@ using Moq;
 using Services.Test.helpers;
 using Xunit;
 
-namespace Services.Test
+namespace Services.Test.NotificationSystem
 {
     public class AgentTest
     {
@@ -81,9 +81,10 @@ namespace Services.Test
             this.notificationSystemAgent.RunAsync(this.runState);
 
             // Assert
-            this.eventProcessorHostWrapperMock.Verify(a => a.CreateEventProcessorHost(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            this.eventProcessorHostWrapperMock.Verify(a => a.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(), It.IsAny<IEventProcessorFactory>()), Times.Never);
+            this.eventProcessorHostWrapperMock.Verify(a => a.CreateEventProcessorHost(It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            this.eventProcessorHostWrapperMock.Verify(a => a.RegisterEventProcessorFactoryAsync(It.IsAny<EventProcessorHost>(),
+                It.IsAny<IEventProcessorFactory>()), Times.Never);
 
         }
     }
