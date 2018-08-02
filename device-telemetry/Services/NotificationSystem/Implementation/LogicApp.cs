@@ -61,18 +61,6 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSyst
 
         private string GenerateRuleDetailUrl()
         {
-            /*
-             * From the deployment script used in the CLI:
-             * 
-             "storageName": {
-            "type": "string",
-            "defaultValue": "[concat('storage', take(uniqueString(subscription().subscriptionId, resourceGroup().id, parameters('solutionName')), 5))]",
-            "metadata": {
-                "description": "The name of the storageAccount"
-            }
-            // The deployment sets the storage account name as the solution name. 
-            // Work around, can set an environment variable. 
-             */
             return "https://" + this.solutionName + ".azurewebsites.net/maintenance/rule/" + this.ruleId;
         }
 
