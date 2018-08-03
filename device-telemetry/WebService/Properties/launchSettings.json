@@ -3,8 +3,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:9004/",
-      "sslPort": 0
+       "applicationUrl": "http://localhost:9004/",
+         "sslPort": 0
     }
   },
   "profiles": {
@@ -16,6 +16,7 @@
         "PCS_TELEMETRY_EVENTHUB_CONNSTRING": "Endpoint=sb://eventhubnamespace-cwb7p.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=pW6d8qWcwnCOIE/JERaCMuD+Y9S1IrvkJ82yTUMGQpA=",
         "PCS_TELEMETRY_DATA_AZUREBLOB_KEY": "dW6oK1HWKLRkGsmeVi2e+3zAgelW6aL48XPTlX0aKwkOPgYhLMEk+QdUgy5V/6KKsoli/bEB3oqVAdkrfndoug==",
         "PCS_STORAGEADAPTER_WEBSERVICE_URL": "http://localhost:9022/v1",
+        "PCS_AUTH_WEBSERVICE_URL": "http://localhost:9001/v1",
         "PCS_TELEMETRY_DATA_AZUREBLOB_ACCOUNT": "storagecwb7p",
         "PCS_TELEMETRY_EVENTHUB_NAME": "notificationsystemeventhub-cwb7p",
         "PCS_TELEMETRY_LOGICAPP_ENDPOINT_URL": "https://prod-44.westeurope.logic.azure.com:443/workflows/9391115d0d16493ca412d06d99042867/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=mJZDTEXElDNcx-DKU4tpCmI1PJCoL95Erub29mbjpyQ",
@@ -36,7 +37,8 @@
         "PCS_TELEMETRY_LOGICAPP_ENDPOINT_URL": "$(PCS_TELEMETRY_LOGICAPP_ENDPOINT_URL)",
         "PCS_TELEMETRY_EVENTHUB_OFFSET_MINUTES": "$({PCS_TELEMETRY_EVENTHUB_OFFSET_MINUTES)",
         "PCS_TELEMETRY_DOCUMENTDB_CONNSTRING": "$(PCS_TELEMETRY_DOCUMENTDB_CONNSTRING)",
-        "PCS_TELEMETRY_EVENTHUB_CONTAINER": "$(PCS_TELEMETRY_EVENTHUB_CONTAINER)"
+        "PCS_TELEMETRY_EVENTHUB_CONTAINER": "$(PCS_TELEMETRY_EVENTHUB_CONTAINER)",
+        "PCS_AUTH_WEBSERVICE_URL": "http://localhost:9001/v1"
       },
       "applicationUrl": "http://localhost:9004/v1/status"
     }

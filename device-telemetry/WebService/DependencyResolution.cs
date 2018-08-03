@@ -8,6 +8,7 @@ using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Http;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.External;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime;
 using Microsoft.Extensions.DependencyInjection;
@@ -106,6 +107,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService
             // for each request, which is good to reduce the risk of memory
             // leaks, but not so good for the overall performance.
             //builder.RegisterType<CLASS_NAME>().As<INTERFACE_NAME>().SingleInstance();
+            builder.RegisterType<UserManagementClient>().As<IUserManagementClient>().SingleInstance();
         }
 
         private static void RegisterFactory(IContainer container)

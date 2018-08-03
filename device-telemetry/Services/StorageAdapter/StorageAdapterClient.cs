@@ -19,7 +19,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.StorageAdapter
         Task<ValueListApiModel> GetAllAsync(string collectionId);
         Task<ValueApiModel> GetAsync(string collectionId, string key);
         Task<ValueApiModel> CreateAsync(string collectionId, string value);
-        Task<ValueApiModel> UpdateAsync(string collectionId, string key, string value, string etag);
+        Task<ValueApiModel> UpsertAsync(string collectionId, string key, string value, string etag);
         Task DeleteAsync(string collectionId, string key);
     }
 
@@ -103,7 +103,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.StorageAdapter
             return JsonConvert.DeserializeObject<ValueApiModel>(response.Content);
         }
 
-        public async Task<ValueApiModel> UpdateAsync(string collectionId, string key, string value, string etag)
+        public async Task<ValueApiModel> UpsertAsync(string collectionId, string key, string value, string etag)
         {
             var response = await this.httpClient.PutAsync(
                 this.PrepareRequest($"collections/{collectionId}/values/{key}",

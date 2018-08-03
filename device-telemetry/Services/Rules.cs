@@ -28,7 +28,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
             string order,
             int skip,
             int limit,
-            string groupId);
+            string groupId,
+            bool includeDeleted);
 
         Task<List<AlarmCountByRule>> GetAlarmCountForListAsync(
             DateTimeOffset? from,
@@ -40,7 +41,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
 
         Task<Rule> CreateAsync(Rule rule);
 
-        Task<Rule> UpsertAsync(Rule rule);
+        Task<Rule> UpsertIfNotDeletedAsync(Rule rule);
     }
 
     public class Rules : IRules
@@ -85,13 +86,35 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
 
         public async Task DeleteAsync(string id)
         {
-            if (Regex.IsMatch(id, INVALID_CHARACTER))
+            Rule existing;
+            try
             {
-                this.log.Debug("id contains illegal characters.", () => new { id });
-                throw new InvalidInputException("id contains illegal characters.");
+                existing = await this.GetAsync(id);
+            }
+            catch (ResourceNotFoundException exception)
+            {
+                this.log.Debug("Tried to delete rule which did not exist", () => new { id, exception });
+                return;
+            }
+            catch (Exception exception)
+            {
+                this.log.Error("Error trying to delete rule", () => new { id, exception });
+                throw exception;
             }
 
-            await this.storage.DeleteAsync(STORAGE_COLLECTION, id);
+            if (existing.Deleted)
+            {
+                return;
+            }
+
+            existing.Deleted = true;
+
+            var item = JsonConvert.SerializeObject(existing);
+            await this.storage.UpsertAsync(
+                STORAGE_COLLECTION,
+                existing.Id,
+                item,
+                existing.ETag);
         }
 
         public async Task<Rule> GetAsync(string id)
@@ -115,7 +138,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
             string order,
             int skip,
             int limit,
-            string groupId)
+            string groupId,
+            bool includeDeleted)
         {
             var data = await this.storage.GetAllAsync(STORAGE_COLLECTION);
             var ruleList = new List<Rule>();
@@ -127,8 +151,9 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
                     rule.ETag = item.ETag;
                     rule.Id = item.Key;
 
-                    if (string.IsNullOrEmpty(groupId) ||
+                    if ((string.IsNullOrEmpty(groupId) ||
                         rule.GroupId.Equals(groupId, StringComparison.OrdinalIgnoreCase))
+                        && (!rule.Deleted || includeDeleted))
                     {
                         ruleList.Add(rule);
                     }
@@ -177,7 +202,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
             var alarmCountByRuleList = new List<AlarmCountByRule>();
 
             // get list of rules
-            var rulesList = await this.GetListAsync(order, skip, limit, null);
+            var rulesList = await this.GetListAsync(order, skip, limit, null, true);
 
             // get open alarm count and most recent alarm for each rule
             foreach (var rule in rulesList)
@@ -225,12 +250,13 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
 
             Rule newRule = this.Deserialize(result.Data);
             newRule.ETag = result.ETag;
-            newRule.Id = result.Key;
+
+            if (string.IsNullOrEmpty(newRule.Id)) newRule.Id = result.Key;
 
             return newRule;
         }
 
-        public async Task<Rule> UpsertAsync(Rule rule)
+        public async Task<Rule> UpsertIfNotDeletedAsync(Rule rule)
         {
             if (rule == null)
             {
@@ -242,7 +268,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
             Rule savedRule = null;
             try
             {
-                savedRule = await GetAsync(rule.Id);
+                savedRule = await this.GetAsync(rule.Id);
             }
             catch (ResourceNotFoundException e)
             {
@@ -250,17 +276,31 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
                 this.log.Info("Rule not found will create new rule for Id:", () => new { rule.Id, e });
             }
 
-            if (savedRule == null)
+            if (savedRule != null && savedRule.Deleted)
             {
-                return await CreateAsync(rule);
+                throw new ResourceNotFoundException($"Rule {rule.Id} not found");
             }
 
-            rule.DateCreated = savedRule.DateCreated;
-            rule.DateModified = DateTimeOffset.UtcNow.ToString(DATE_FORMAT);
+            return await this.UpsertAsync(rule, savedRule);
+        }
 
-            // Save the updated rule
+        private async Task<Rule> UpsertAsync(Rule rule, Rule savedRule)
+        {
+            // If rule does not exist and id is provided upsert rule with that id
+            if (savedRule == null && rule.Id != null)
+            {
+                rule.DateCreated = DateTimeOffset.UtcNow.ToString(DATE_FORMAT);
+                rule.DateModified = rule.DateCreated;
+            }
+            else // update rule with stored date created
+            {
+                rule.DateCreated = savedRule.DateCreated;
+                rule.DateModified = DateTimeOffset.UtcNow.ToString(DATE_FORMAT);
+            }
+
+            // Save the updated rule if it exists or create new rule with id
             var item = JsonConvert.SerializeObject(rule);
-            var result = await this.storage.UpdateAsync(
+            var result = await this.storage.UpsertAsync(
                 STORAGE_COLLECTION,
                 rule.Id,
                 item,

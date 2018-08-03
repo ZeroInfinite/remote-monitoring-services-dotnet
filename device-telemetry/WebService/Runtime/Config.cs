@@ -39,10 +39,14 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
         private const string ALARMS_DB_KEY = "TelemetryService:Alarms:";
         private const string ALARMS_DB_DATABASE_KEY = ALARMS_DB_KEY + "database";
         private const string ALARMS_DB_COLLECTION_KEY = ALARMS_DB_KEY + "collection";
+        private const string ALARMS_DB_MAX_DELETE_RETRIES = ALARMS_DB_KEY + "max_delete_retries";
 
         private const string STORAGE_ADAPTER_KEY = "StorageAdapterService:";
         private const string STORAGE_ADAPTER_API_URL_KEY = STORAGE_ADAPTER_KEY + "webservice_url";
         private const string STORAGE_ADAPTER_API_TIMEOUT_KEY = STORAGE_ADAPTER_KEY + "webservice_timeout";
+
+        private const string USER_MANAGEMENT_KEY = "UserManagementService:";
+        private const string USER_MANAGEMENT_URL_KEY = USER_MANAGEMENT_KEY + "webservice_url";
 
         private const string CLIENT_AUTH_KEY = APPLICATION_KEY + "ClientAuth:";
         private const string CORS_WHITELIST_KEY = CLIENT_AUTH_KEY + "cors_whitelist";
@@ -83,9 +87,10 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
                 MessagesConfig = new StorageConfig(
                     configData.GetString(MESSAGES_DB_DATABASE_KEY),
                     configData.GetString(MESSAGES_DB_COLLECTION_KEY)),
-                AlarmsConfig = new StorageConfig(
+                AlarmsConfig = new AlarmsConfig(
                     configData.GetString(ALARMS_DB_DATABASE_KEY),
-                    configData.GetString(ALARMS_DB_COLLECTION_KEY)),
+                    configData.GetString(ALARMS_DB_COLLECTION_KEY),
+                    configData.GetInt(ALARMS_DB_MAX_DELETE_RETRIES)),
                 StorageType = configData.GetString(STORAGE_TYPE_KEY),
                 DocumentDbConnString = configData.GetString(DOCUMENTDB_CONNSTRING_KEY),
                 DocumentDbThroughput = configData.GetInt(DOCUMENTDB_RUS_KEY),
@@ -94,7 +99,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime
                 EventHubConnectionString = configData.GetString(EVENTHUB_CONNECTION_KEY),
                 EventHubName = configData.GetString(EVENTHUB_NAME),
                 LogicAppEndPointUrl = configData.GetString(LOGICAPP_ENDPOINT_URL),
-                SolutionName = configData.GetString(SOLUTION_NAME_KEY)
+                SolutionName = configData.GetString(SOLUTION_NAME_KEY),
+                UserManagementApiUrl = configData.GetString(USER_MANAGEMENT_URL_KEY)
             };
 
             this.ClientAuthConfig = new ClientAuthConfig

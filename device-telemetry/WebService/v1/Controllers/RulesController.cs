@@ -23,7 +23,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
         [HttpGet("{id}")]
         public async Task<RuleApiModel> GetAsync([FromRoute] string id)
         {
-            return new RuleApiModel(await this.ruleService.GetAsync(id));
+            Rule rule = await this.ruleService.GetAsync(id);
+            return new RuleApiModel(rule, rule.Deleted);
         }
 
         [HttpGet]
@@ -31,21 +32,26 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
             [FromQuery] string order,
             [FromQuery] int? skip,
             [FromQuery] int? limit,
-            [FromQuery] string groupId)
+            [FromQuery] string groupId,
+            [FromQuery] bool? includeDeleted)
         {
             if (order == null) order = "asc";
             if (skip == null) skip = 0;
             if (limit == null) limit = 1000;
+            if (includeDeleted == null) includeDeleted = false;
 
             return new RuleListApiModel(
                 await this.ruleService.GetListAsync(
                     order,
                     skip.Value,
                     limit.Value,
-                    groupId));
+                    groupId,
+                    includeDeleted.Value),
+                includeDeleted.Value);
         }
 
         [HttpPost]
+        [Authorize("CreateRules")]
         public async Task<RuleApiModel> PostAsync(
             [FromQuery] string template,
             [FromBody] RuleApiModel rule)
@@ -64,10 +70,11 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
             }
             Rule newRule = await this.ruleService.CreateAsync(rule.ToServiceModel());
 
-            return new RuleApiModel(newRule);
+            return new RuleApiModel(newRule, false);
         }
 
         [HttpPut("{id}")]
+        [Authorize("UpdateRules")]
         public async Task<RuleApiModel> PutAsync(
             [FromRoute] string id,
             [FromBody] RuleApiModel rule)
@@ -79,12 +86,13 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
 
             //Ensure the id on the model matches the route
             rule.Id = id;
-            Rule updatedRule = await this.ruleService.UpsertAsync(rule.ToServiceModel());
+            Rule updatedRule = await this.ruleService.UpsertIfNotDeletedAsync(rule.ToServiceModel());
 
-            return new RuleApiModel(updatedRule);
+            return new RuleApiModel(updatedRule, false);
         }
 
         [HttpDelete("{id}")]
+        [Authorize("DeleteRules")]
         public async Task DeleteAsync([FromRoute] string id)
         {
             await this.ruleService.DeleteAsync(id);

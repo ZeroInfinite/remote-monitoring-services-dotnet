@@ -50,8 +50,8 @@ namespace WebService.Test.Controllers
             this.log = new Mock<ILogger>();
 
             this.storage = new StorageClient(servicesConfig, this.log.Object);
-            string dbName = servicesConfig.AlarmsConfig.DocumentDbDatabase;
-            string collName = servicesConfig.AlarmsConfig.DocumentDbCollection;
+            string dbName = servicesConfig.AlarmsConfig.StorageConfig.DocumentDbDatabase;
+            string collName = servicesConfig.AlarmsConfig.StorageConfig.DocumentDbCollection;
             this.storage.CreateCollectionIfNotExistsAsync(dbName, collName);
 
             this.sampleAlarms = this.getSampleAlarms();

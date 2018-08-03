@@ -32,7 +32,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models
         public IList<Condition> Conditions { get; set; } = new List<Condition>();
         [JsonConverter(typeof(ActionConverter))]
         public IList<IActionItem> Actions { get; set; } = new List<IActionItem>();
-
+        public bool Deleted { get; set; } = false;
         public Rule() { }
 
         public int CompareTo(Rule other)

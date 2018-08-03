@@ -2,7 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
@@ -41,7 +45,11 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
             DateTimeOffset? to,
             string[] devices);
 
-            Task<Alarm> UpdateAsync(string id, string status);
+        Task<Alarm> UpdateAsync(string id, string status);
+
+        Task Delete(List<string> ids);
+
+        Task DeleteAsync(string id);
     }
 
     public class Alarms : IAlarms
@@ -53,6 +61,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
 
         private readonly string databaseName;
         private readonly string collectionId;
+        private readonly int maxDeleteRetryCount;
 
         // constants for storage keys
         private const string MESSAGE_RECEIVED_KEY = "device.msg.received";
@@ -72,9 +81,10 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
             ILogger logger)
         {
             this.storageClient = storageClient;
-            this.databaseName = config.AlarmsConfig.DocumentDbDatabase;
-            this.collectionId = config.AlarmsConfig.DocumentDbCollection;
+            this.databaseName = config.AlarmsConfig.StorageConfig.DocumentDbDatabase;
+            this.collectionId = config.AlarmsConfig.StorageConfig.DocumentDbCollection;
             this.log = logger;
+            this.maxDeleteRetryCount = config.AlarmsConfig.MaxDeleteRetries;
         }
 
         public Alarm Get(string id)
@@ -96,7 +106,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
             int limit,
             string[] devices)
         {
-            string sql = QueryBuilder.GetDocumentsSql(
+            var sql = QueryBuilder.GetDocumentsSql(
                 ALARM_SCHEMA_KEY,
                 null, null,
                 from, MESSAGE_RECEIVED_KEY,
@@ -139,7 +149,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
             int limit,
             string[] devices)
         {
-            string sql = QueryBuilder.GetDocumentsSql(
+            var sql = QueryBuilder.GetDocumentsSql(
                 ALARM_SCHEMA_KEY,
                 id, RULE_ID_KEY,
                 from, MESSAGE_RECEIVED_KEY,
@@ -185,7 +195,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
         {
             // build sql query to get open/acknowledged alarm count for rule
             string[] statusList = { ALARM_STATUS_OPEN, ALARM_STATUS_ACKNOWLEDGED };
-            string sql = QueryBuilder.GetCountSql(
+            var sql = QueryBuilder.GetCountSql(
                 ALARM_SCHEMA_KEY,
                 id, RULE_ID_KEY,
                 from, MESSAGE_RECEIVED_KEY,
@@ -232,12 +242,18 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
                 throw new InvalidInputException("id contains illegal characters.");
             }
 
+            var query = new SqlQuerySpec(
+                "SELECT * FROM c WHERE c.id=@id",
+                new SqlParameterCollection(new SqlParameter[] {
+                    new SqlParameter { Name = "@id", Value = id }
+                })
+            );
             // Retrieve the document using the DocumentClient.
             List<Document> documentList = this.storageClient.QueryDocuments(
                 this.databaseName,
                 this.collectionId,
                 null,
-                "SELECT * FROM c WHERE c.id='" + id + "'",
+                query,
                 0,
                 DOC_QUERY_LIMIT);
 
@@ -247,6 +263,69 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services
             }
 
             return null;
+        }
+
+        public async Task Delete(List<string> ids)
+        {
+            Task[] taskList = new Task[ids.Count];
+            for (int i = 0; i < ids.Count; i++)
+            {
+                taskList[i] = this.DeleteAsync(ids[i]);
+            }
+
+            try
+            {
+                await Task.WhenAll(taskList);
+            }
+            catch (AggregateException aggregateException)
+            {
+                Exception inner = aggregateException.InnerExceptions[0];
+                this.log.Error("Failed to delete alarm", () => new { inner });
+                throw inner;
+            }
+        }
+
+        /**
+         * Delete an individual alarm by id. If the delete fails for a DocumentClientException
+         * other than not found, retry up to this.maxRetryCount
+         */
+        public async Task DeleteAsync(string id)
+        {
+            int retryCount = 0;
+            while (retryCount < this.maxDeleteRetryCount)
+            {
+                try
+                {
+                    await this.storageClient.DeleteDocumentAsync(
+                        this.databaseName,
+                        this.collectionId,
+                        id);
+                    return;
+                }
+                catch (DocumentClientException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return;
+                }
+                catch (Exception e)
+                {
+                    // only delay if there is a suggested retry (i.e. if the request is throttled)
+                    TimeSpan retryTimeSpan = TimeSpan.Zero;
+                    if (e.GetType() == typeof(DocumentClientException))
+                    {
+                        retryTimeSpan = ((DocumentClientException) e).RetryAfter;
+                    }
+                    retryCount++;
+                    
+                    if (retryCount >= this.maxDeleteRetryCount)
+                    {
+                        this.log.Error("Failed to delete alarm", () => new { id, e });
+                        throw new ExternalDependencyException(e);
+                    }
+
+                    this.log.Warn("Exception on delete alarm", () => new { id, e });
+                    Thread.Sleep(retryTimeSpan);
+                }
+            }
         }
     }
 }

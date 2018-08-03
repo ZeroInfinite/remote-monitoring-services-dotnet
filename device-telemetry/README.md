@@ -45,6 +45,7 @@ Follow the instructions for
 
 This service depends on the following repository.
 1. [Storage Adapter Microservice](https://github.com/Azure/pcs-storage-adapter-dotnet)
+2. [Authentication Microservice](https://github.com/Azure/pcs-auth-dotnet)
 
 ### 3. Environment variables required to run the service
 In order to run the service, some environment variables need to be created
@@ -53,22 +54,25 @@ for more information. More information on environment variables
 [here](#configuration-and-environment-variables).
   * `PCS_TELEMETRY_DOCUMENTDB_CONNSTRING` = {your Azure Cosmos DB connection string}
   * `PCS_STORAGEADAPTER_WEBSERVICE_URL` = http://localhost:9022/v1
+  * `PCS_AUTH_WEBSERVICE_URL` = http://localhost:9001/v1
 
-## Running the service with Visual Studio
+## Running the service with Visual Studio or VS Code
+
 1. Make sure the [Prerequisites](#prerequisites) are set up.
-1. Install any edition of [Visual Studio 2017][vs-install-url] or Visual
-   Studio for Mac. When installing check ".NET Core" workload. If you
-   already have Visual Studio installed, then ensure you have
+1. [Install .NET Core 2.x][dotnet-install]
+1. Install any recent edition of Visual Studio (Windows/MacOS) or Visual
+   Studio Code (Windows/MacOS/Linux).
+   * If you already have Visual Studio installed, then ensure you have
    [.NET Core Tools for Visual Studio 2017][dotnetcore-tools-url]
    installed (Windows only).
-1. Open the solution in Visual Studio
-1. Edit the WebService project properties by right clicking on the 
-Webservice project > Properties > Debug. Add following required environment
-variables to the Debug settings. In Windows
-   you can also set these [in your system][windows-envvars-howto-url].
-   1. `PCS_TELEMETRY_DOCUMENTDB_CONNSTRING` = {your Azure Cosmos DB connection string}
+   * If you already have VS Code installed, then ensure you have the [C# for Visual Studio Code (powered by OmniSharp)][omnisharp-url] extension installed.
+1. Open the solution in Visual Studio or VS Code.
+1. Define the following environment variables. See [Configuration and Environment variables](#configuration-and-environment-variables) for detailed information for setting these for your enviroment.
+   1. `PCS_TELEMETRY_DOCUMENTDB_CONNSTRING` = {your Azure Document Db connection string}
    1. `PCS_STORAGEADAPTER_WEBSERVICE_URL` = http://localhost:9022/v1
-1. In Visual Studio, start the WebService project
+   1. `PCS_AUTH_WEBSERVICE_URL` = http://localhost:9001/v1
+   1. etc...
+1. Start the WebService project (e.g. press F5).
 1. Using an HTTP client like [Postman][postman-url], use the 
 [RESTful API][project-wiki] to test out the service.
 
@@ -80,6 +84,7 @@ More information on environment variables
 [here](#configuration-and-environment-variables).
     1. `PCS_TELEMETRY_DOCUMENTDB_CONNSTRING` = {your Azure Cosmos DB connection string}
     1. `PCS_STORAGEADAPTER_WEBSERVICE_URL` = http://localhost:9022/v1
+    1. `PCS_AUTH_WEBSERVICE_URL` = http://localhost:9001/v1
 1. Use the scripts in the [scripts](scripts) folder for many frequent tasks:
    * `build`: compile all the projects and run the tests.
    * `compile`: compile all the projects.
@@ -109,31 +114,39 @@ required to package the service into a Docker image:
 
 ## Configuration and Environment variables
 
-The service configuration is stored using ASP.NET Core configuration
-adapters, in [appsettings.ini](WebService/appsettings.ini). The INI format allows to
-store values in a readable format, with comments. The application also
-supports references to environment variables, which is used to import
-credentials and networking details.
+The service configuration is accessed via ASP.NET Core configuration
+adapters, and stored in [appsettings.ini](WebService/appsettings.ini).
+The INI format allows to store values in a readable format, with comments.
 
-The configuration files in the repository reference some environment
-variables that need to be created at least once. Depending on your OS and
-the IDE, there are several ways to manage environment variables:
+The configuration also supports references to environment variables, e.g. to
+import credentials and network details. Environment variables are not
+mandatory though, you can for example edit appsettings.ini and write
+credentials directly in the file. Just be careful not sharing the changes,
+e.g. sending a Pull Request or checking in the changes in git.
 
-* Windows: the variables can be set [in the system][windows-envvars-howto-url]
-  as a one time only task. The
-  [env-vars-setup.cmd](scripts/env-vars-setup.cmd) script included needs to
-  be prepared and executed just once. The settings will persist across
-  terminal sessions and reboots.
-* Visual Studio: the variables can be set in the project settings for WebService
-  under Project Properties -> Configuration
-  Properties -> Environment
-* For Linux and OSX environments, the [env-vars-setup](scripts/env-vars-setup)
-  script needs to be executed every time a new console is opened.
-  Depending on the OS and terminal, there are ways to persist values
-  globally, for more information these pages should help:
-  * https://stackoverflow.com/questions/13046624/how-to-permanently-export-a-variable-in-linux
-  * https://stackoverflow.com/questions/135688/setting-environment-variables-in-os-x
-  * https://help.ubuntu.com/community/EnvironmentVariables
+The configuration file in the repository references some environment
+variables that need to be defined. Depending on the OS and the IDE used,
+there are several ways to manage environment variables.
+
+1. If you're using Visual Studio (Windows/MacOS), the environment
+   variables are loaded from the project settings. Right click on WebService,
+   and select Options/Properties, and find the section with the list of env
+   vars. See [WebService/Properties/launchSettings.json](WebService/Properties/launchSettings.json).
+1. Visual Studio Code (Windows/MacOS/Linux) loads the environment variables from
+   [.vscode/launch.json](.vscode/launch.json)
+1. When running the service **with Docker** or **from the command line**, the
+   application will inherit environment variables values from the system. 
+   * [This page][windows-envvars-howto-url] describes how to setup env vars
+     in Windows. We suggest to edit and execute once the
+     [env-vars-setup.cmd](scripts/env-vars-setup.cmd) script included in the
+     repository. The settings will persist across terminal sessions and reboots.
+   * For Linux and MacOS, we suggest to edit and execute
+     [env-vars-setup](scripts/env-vars-setup) each time, before starting the
+     service. Depending on OS and terminal, there are ways to persist values
+     globally, for more information these pages should help:
+     * https://stackoverflow.com/questions/13046624/how-to-permanently-export-a-variable-in-linux
+     * https://stackoverflow.com/questions/135688/setting-environment-variables-in-os-x
+     * https://help.ubuntu.com/community/EnvironmentVariables
 
 # Contributing to the solution
 
@@ -157,8 +170,10 @@ Licensed under the [MIT](LICENSE) License.
 [gitter-url]: https://gitter.im/azure/iot-solutions
 [project-wiki]: https://github.com/Azure/device-telemetry-dotnet/wiki/%5BAPI-Specifications%5D-Messages
 [postman-url]: https://www.getpostman.com
+[dotnet-install]: https://www.microsoft.com/net/learn/get-started
 [vs-install-url]: https://www.visualstudio.com/downloads
 [dotnetcore-tools-url]: https://www.microsoft.com/net/core#windowsvs2017
+[omnisharp-url]: https://github.com/OmniSharp/omnisharp-vscodedowsvs2017
 [windows-envvars-howto-url]: https://superuser.com/questions/949560/how-do-i-set-system-environment-variables-in-windows-10
 [docker-compose-install-url]: https://docs.docker.com/compose/install
 [run-with-docker-url]:https://docs.microsoft.com/azure/iot-suite/iot-suite-remote-monitoring-deploy-local#run-the-microservices-in-docker

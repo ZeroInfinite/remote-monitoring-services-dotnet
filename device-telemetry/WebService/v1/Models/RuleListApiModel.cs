@@ -23,14 +23,14 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Models
             { "$uri", "/" + Version.PATH + "/rules" },
         };
 
-        public RuleListApiModel(List<Rule> rules)
+        public RuleListApiModel(List<Rule> rules, bool includeDeleted)
         {
             this.items = new List<RuleApiModel>();
             if (rules != null)
             {
                 foreach (Rule rule in rules)
                 {
-                    this.items.Add(new RuleApiModel(rule));
+                    this.items.Add(new RuleApiModel(rule, includeDeleted));
                 }
             }
         }
