@@ -2,10 +2,10 @@
 
 using System.Collections.Generic;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Exceptions;
-using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models;
 using Newtonsoft.Json.Linq;
 using Services.Test.helpers;
 using Xunit;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models;
 
 namespace Services.Test
 {
@@ -31,7 +31,7 @@ namespace Services.Test
             };
 
             // Act 
-            var targetAction = new EmailActionItem(Type.Email, parameters);
+            var targetAction = new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters);
 
             // Assert 
             Assert.True(this.IsEmailActionItemReadProperly(targetAction));
@@ -49,7 +49,7 @@ namespace Services.Test
             };
 
             // Act and Assert
-            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Type.Email, parameters));
+            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters));
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -63,7 +63,7 @@ namespace Services.Test
             };
 
             // Act and Assert
-            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Type.Email, parameters));
+            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters));
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -78,7 +78,7 @@ namespace Services.Test
             };
 
             // Act and Assert
-            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Type.Email, parameters));
+            Assert.Throws<InvalidInputException>(() => new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters));
         }
 
         [Fact, Trait(Constants.TYPE, Constants.UNIT_TEST)]
@@ -93,7 +93,7 @@ namespace Services.Test
             };
 
             // Act 
-            var targetAction = new EmailActionItem(Type.Email, parameters);
+            var targetAction = new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, parameters);
 
             // Assert 
             Assert.True(this.IsEmailActionItemReadProperly(targetAction));
@@ -101,7 +101,7 @@ namespace Services.Test
 
         private bool IsEmailActionItemReadProperly(EmailActionItem emailActionItem)
         {
-            return emailActionItem.Type == Type.Email
+            return emailActionItem.Type == Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email
                 && string.Equals(emailActionItem.Parameters[PARAM_TEMPLATE_KEY], PARAM_TEMPLATE)
                 && this.IsListOfEmailEqual((List<string>)emailActionItem.Parameters[PARAM_EMAIL_KEY]);
         }

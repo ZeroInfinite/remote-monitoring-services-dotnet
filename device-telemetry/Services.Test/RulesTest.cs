@@ -327,7 +327,7 @@ namespace Services.Test
                 ETag = "1234",
                 Key = newRuleId
             };
-            
+
 
             this.storageAdapter.Setup(x => x.CreateAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(result));
@@ -359,7 +359,7 @@ namespace Services.Test
 
             var sampleActions = new List<IActionItem>
             {
-                new EmailActionItem(Type.Email, new Dictionary<string, object>()
+                new EmailActionItem(Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Models.Type.Email, new Dictionary<string, object>()
                     {
                         {"email", new Newtonsoft.Json.Linq.JArray(){"sampleEmail@gmail.com", "sampleEmail2@gmail.com"}},
                         {"subject", "Test Email"}
