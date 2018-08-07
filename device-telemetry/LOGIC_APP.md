@@ -1,19 +1,16 @@
 # Logic App
 
-LogicApps are a managed service that provides the Lego blocks of Azure serverless architecture that you can use to create, develop and deploy cloud-based integrations 
-and workflows. The developer merely strings together off-the-self, ready-made components with as little effort as possible. The aim is to go from development to production 
-in a few simple, reproducible steps. Microsoft are investing strongly in this technology, introducing many new connectors in line with the demands of the integration requirements of enterprises.
+LogicApps are a managed service that provides serverless architecture that you can use to create,
+develop and deploy cloud-based integrations and workflows. This makes it easy to add ready-made
+components to your workflow.
 
 ## Use Case
 
-We've used Logic Apps to send out email alert notification as specified for each rule in the alerts. 
-
-Below is a designer view of how the Logic App has been laid out: 
-
-![Alt text](/images/logic_app_designer_view.png?raw=true "Logic App")
-
+Logic Apps are used to send out email alert notification when an alert is triggered for a rule with
+email notifications added as an action.
 
 ## Modifications
 
-The Logic App can be modified to perform actions depending on custom use case. 
-Logic App supports various other actions. Refer to this website: https://docs.microsoft.com/en-us/azure/logic-apps/ for more information. 
+The Logic App can be modified to perform actions depending on custom use case, for example Office 365,
+Twilio for SMS, or Twitter.
+More information available [here](https://docs.microsoft.com/en-us/azure/logic-apps/).
