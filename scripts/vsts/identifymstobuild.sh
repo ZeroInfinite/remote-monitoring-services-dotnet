@@ -22,7 +22,8 @@ microservices+=(
 get_changed_folders() 
 {
     if [ "$BUILD_SOURCEBRANCHNAME" == "master" ]; then
-        changes=$(git log --name-only --oneline -1 --pretty="format:")
+        commitid=$(git rev-parse HEAD)
+        changes=$(git log -m -1 --name-only --pretty="format:" $commitid)
      else
         changes=$(git whatchanged --name-only --pretty="" origin/master..HEAD)
      fi

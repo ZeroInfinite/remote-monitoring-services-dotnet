@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Exceptions;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Auth;
 
 namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Filters
@@ -32,11 +31,11 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Filters
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
 
-            bool isAuthorized = this.ValidateAuthorization(context.HttpContext, this.allowedAction);
+            bool isAuthorized = this.IsValidAuthorization(context.HttpContext, this.allowedAction);
 
             if (!isAuthorized)
             {
-                throw new NoAuthorizationException($"Current user is not authorized to perform this action: '{this.allowedAction}'");
+                throw new NotAuthorizedException($"Current user is not authorized to perform this action: '{this.allowedAction}'");
             }
             else
             {
@@ -51,7 +50,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Filters
         /// <param name="httpContext">current context of http request</param>
         /// <param name="allowedAction">allowed action required by controller</param>
         /// <returns>true if validatation succeed</returns>
-        private bool ValidateAuthorization(HttpContext httpContext, string allowedAction)
+        private bool IsValidAuthorization(HttpContext httpContext, string allowedAction)
         {
             if (!httpContext.Request.GetAuthRequired() || !httpContext.Request.IsExternalRequest()) return true;
 
