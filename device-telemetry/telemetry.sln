@@ -83,12 +83,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{89DE7432-7
 	ProjectSection(SolutionItems) = preProject
 		ENVIRONMENT_VARIABLES.md = ENVIRONMENT_VARIABLES.md
 		LOGIC_APP.md = LOGIC_APP.md
-		..\..\logic_app_designer_view.PNG = ..\..\logic_app_designer_view.PNG
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{7F84A0F8-E9EB-4917-9441-F841DEC60301}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\logic_app_designer_view.PNG = ..\..\logic_app_designer_view.PNG
 	EndProjectSection
 EndProject
 Global

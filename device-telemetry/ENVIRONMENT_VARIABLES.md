@@ -10,37 +10,37 @@ in the different contexts.
 ## Required Settings
 
 * `PCS_TELEMETRY_DOCUMENTDB_CONNSTRING` [required]: contains the full connection
-string required to connect the telemetry to the Cosmos DB in the Azure cloud, 
-where the Rules, Messages and the Alarms are stored.
+  string required to connect the telemetry to the Cosmos DB in the Azure cloud, 
+  where the Rules, Messages and the Alarms are stored.
 
 * `PCS_STORAGEADAPTER_WEBSERVICE_URL` [required]: the URL where the storage 
-adapter service is available, e.g. `http://127.0.0.1:9022`
+  adapter service is available, e.g. `http://127.0.0.1:9022`
 
 * `PCS_EVENTHUB_CONNSTRING`: [required]:contains the full connection 
-string required to connect the service to the EventHub namespace.
+  string required to connect the service to the EventHub namespace.
   * EventHub Info can be found in the Azure portal at:
     {Your EventHub} > Shared access policies > RootManageSharedAccessKey
 
 * `PCS_EVENTHUB_NAME`: [required]: the name of the eventhub used 
-for notification system in the telemetry service.
+  for notification system in the telemetry service.
   * EventHub Info can be found in the Azure portal at:
     {Your EventHub} > Shared access policies > RootManageSharedAccessKey
 
-* `PCS_ASA_DATA_AZUREBLOB_ACCOUNTT`: [required]: blob storage account 
-used for storing checkpointing data for the eventhub used in the notification system.
+* `PCS_ASA_DATA_AZUREBLOB_ACCOUNT`: [required]: blob storage account 
+  used for storing checkpointing data for the eventhub used in the notification system.
   * Storage Account information:
     {Your storage account} > Access keys
 
 * `PCS_ASA_DATA_AZUREBLOB_KEY`: [required]: blob storage key used 
-for storing checkpointing data for the eventhub used in the notification system.
+  for storing checkpointing data for the eventhub used in the notification system.
   * Storage Account information:
     {Your storage account} > Access keys
 
 * `PCS_TELEMETRY_LOGICAPP_ENDPOINT_URL`: [required]: logic app end point
-URL used to send email actions for Notification system.
+  URL used to send email actions for Notification system.
 
 * `PCS_SOLUTION_NAME`: [required]: Solution name used to generate URL
-for email notifications.
+  for email notifications.
   * This should be the resource group name for your deployment.
 
 ## Optional Settings
