@@ -6,9 +6,9 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.Azure.EventHubs.Processor;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.External;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Http;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.NotificationSystem;
-using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.External;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Runtime;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.Runtime;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,21 +86,34 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService
             IHttpRequest httpRequest = new HttpRequest();
             builder.RegisterInstance(httpRequest).As<IHttpRequest>();
 
-            // Setup Notification
-            IImplementationWrapper implementationWrapper = new ImplementationWraper(config.ServicesConfig, httpRequest, httpClient, logger);
+            // Setup Notifications
+            IImplementationWrapper implementationWrapper = new ImplementationWraper(
+                config.ServicesConfig,
+                httpRequest,
+                httpClient,
+                logger);
             builder.RegisterInstance(implementationWrapper).As<IImplementationWrapper>();
 
             INotification notification = new Notification(implementationWrapper, logger);
             builder.RegisterInstance(notification).As<INotification>();
 
-            //EventHub classes
+            // Setup EventHub
             IEventProcessorHostWrapper eventProcessorHostWrapper = new EventProcessorHostWrapper();
             builder.RegisterInstance(eventProcessorHostWrapper).As<IEventProcessorHostWrapper>().SingleInstance();
-            IEventProcessorFactory eventProcessorFactory = new NotificationEventProcessorFactory(logger, config.ServicesConfig, notification);
+
+            IEventProcessorFactory eventProcessorFactory = new NotificationEventProcessorFactory(
+                logger,
+                config.ServicesConfig,
+                notification);
             builder.RegisterInstance(eventProcessorFactory).As<IEventProcessorFactory>().SingleInstance();
 
-            // NotificationSystemAgent uses default implementation because using eventHubFactory. 
-            var notificationSystemAgent = new Agent(logger, config.ServicesConfig, config.BlobStorageConfig, eventProcessorHostWrapper, eventProcessorFactory);
+            var notificationSystemAgent = new Agent(
+                logger,
+                config.ServicesConfig,
+                config.BlobStorageConfig,
+                eventProcessorHostWrapper,
+                eventProcessorFactory);
+
             builder.RegisterInstance(notificationSystemAgent).As<IAgent>().SingleInstance();
 
             // By default Autofac uses a request lifetime, creating new objects
