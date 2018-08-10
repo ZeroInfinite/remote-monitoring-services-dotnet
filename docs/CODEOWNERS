@@ -2,6 +2,17 @@
 
 # Order is important; the last matching pattern takes the most precedence.
 
-*         @timlaverty @dluc @ppathan
+*                   @timlaverty @dluc @ppathan
 
-LICENSE   @timlaverty @dluc @ppathan
+LICENSE             @timlaverty @dluc @ppathan
+iothub-manager      @molly-moen @sushilraje
+device-telemetry    @molly-moen @jillcary
+storage-adapter     @sushilraje @isaac73
+asa-manager         @zhang-hua @molly-moen
+auth                @elvinm @jillcary
+config              @isaac73 @zhang-hua
+
+
+
+
+
