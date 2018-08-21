@@ -5,6 +5,10 @@
     <AssemblyName>Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService</AssemblyName>
     <RootNamespace>Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
   <ItemGroup>
     <Content Include="appsettings.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

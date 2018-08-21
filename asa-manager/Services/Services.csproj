@@ -5,6 +5,10 @@
     <AssemblyName>Microsoft.Azure.IoTSolutions.AsaManager.Services</AssemblyName>
     <RootNamespace>Microsoft.Azure.IoTSolutions.AsaManager.Services</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="jint" Version="2.10.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.1" />

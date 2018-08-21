@@ -4,6 +4,10 @@
     <AssemblyName>Microsoft.Azure.IoTSolutions.AsaManager.SetupAgent</AssemblyName>
     <RootNamespace>Microsoft.Azure.IoTSolutions.AsaManager.SetupAgent</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Services\Services.csproj" />
   </ItemGroup>

@@ -5,6 +5,10 @@
     <AssemblyName>Microsoft.Azure.IoTSolutions.IotHubManager.Services</AssemblyName>
     <RootNamespace>Microsoft.Azure.IoTSolutions.IotHubManager.Services</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Devices" Version="1.4.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.0" />
