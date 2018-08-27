@@ -57,6 +57,11 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.Services.Storage
                     await storage.CreateDatabaseAndCollectionsIfNotExistAsync();
                     return;
                 }
+                else if (this.storageType == AsaOutputStorageType.TimeSeriesInsights)
+                {
+                    this.log.Info("Skip creating output storage because the storage type is Time Series Insights", () => { });
+                    return;
+                }
             }
             catch (Exception e)
             {

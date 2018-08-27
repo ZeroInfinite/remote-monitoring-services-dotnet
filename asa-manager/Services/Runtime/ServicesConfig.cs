@@ -5,7 +5,10 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.Services.Runtime
     // Types of storage where ASA writes messages and alarms
     public enum AsaOutputStorageType
     {
-        CosmosDbSql = 1
+        CosmosDbSql = 1,
+        cosmosdb = CosmosDbSql,
+        TimeSeriesInsights = 2,
+        tsi = TimeSeriesInsights
     }
 
     public interface IServicesConfig
