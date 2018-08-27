@@ -19,12 +19,14 @@ then
 	flattenMeasurementsJsUdf=$(process_files ./functions/flattenMeasurements.js)
 	removeUnusedPropertiesJsUdf=$(process_files ./functions/removeUnusedProperties.js)
 	transformQuery=$(process_files ./Script.asaql)
+	alarmsOnlyQuery=$(process_files ./alarmsOnlyQuery.asaql)
 	streamingJobQuery=`cat << eof
             "defaultValue": {
                 "applyRuleFilterJsUdf": "$applyRuleFilterJsUdf",
                 "flattenMeasurementsJsUdf": "$flattenMeasurementsJsUdf",
                 "removeUnusedPropertiesJsUdf": "$removeUnusedPropertiesJsUdf",
-                "transformQuery": "$transformQuery"
+                "transformQuery": "$transformQuery",
+                "alarmsOnlyQuery": "$alarmsOnlyQuery"
             }
 eof
 `
