@@ -27,3 +27,6 @@ SETX PCS_EVENTHUB_NAME "..."
 
 :: Azure CosmosDb SQL connection string, storage used for telemetry and alarms
 SETX PCS_TELEMETRY_DOCUMENTDB_CONNSTRING "AccountEndpoint=https://....documents.azure.com:443/;AccountKey=...;"
+
+:: The storage type for telemetry messages. Default is "tsi". Allowed values: ["cosmosdb", "tsi"]
+SETX PCS_TELEMETRY_STORAGE_TYPE="tsi"

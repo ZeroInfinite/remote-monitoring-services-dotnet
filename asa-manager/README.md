@@ -95,6 +95,7 @@ for more information. More information on environment variables
    ex. "core.windows.net" }
 * `PCS_EVENTHUB_CONNSTRING` = { Event Hub Connection String for RootManageSharedAccessKey }
 * `PCS_EVENTHUB_NAME` = { Name of Event Hub }
+* `PCS_TELEMETRY_STORAGE_TYPE` = { "tsi" or "cosmosdb", default is "tsi" }
 
 ## Running the service with Visual Studio
 

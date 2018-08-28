@@ -47,4 +47,9 @@ IF "%PCS_EVENTHUB_NAME%" == "" (
     exit /B 1
 )
 
+IF "%PCS_TELEMETRY_STORAGE_TYPE%" == "" (
+    echo Error: the PCS_TELEMETRY_STORAGE_TYPE environment variable is not defined.
+    exit /B 1
+)
+
 endlocal
