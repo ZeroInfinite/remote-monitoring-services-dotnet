@@ -94,6 +94,7 @@ GOTO :Run
         -e PCS_AUTH_ISSUER ^
         -e PCS_AUTH_AUDIENCE ^
         -e PCS_TWIN_READ_WRITE_ENABLED ^
+        -e PCS_TELEMETRY_DOCUMENTDB_CONNSTRING ^
         -e PCS_TELEMETRY_STORAGE_TYPE ^
         -v %PCS_CACHE%\sandbox\.config:/root/.config ^
         -v %PCS_CACHE%\sandbox\.dotnet:/root/.dotnet ^
