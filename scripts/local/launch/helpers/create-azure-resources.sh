@@ -36,13 +36,13 @@ function check_dependencies {
 	# check if node is installed
 	local chck_node=$(node_is_installed)
 	if [ $chck_node -ne 0 ]; then
-		echo "Please install node with version 8.11.3 or greater (but not node version 10)."
+		echo "Please install node with version 8.11.3 or greater (but not version 10)."
 		exit 1
 	fi
         
 	local chck_node_v=$(check_node_version)
 	if [ $chck_node_v -ne 0 ]; then
-		echo "Please update your node with version 8.11.3 or greater (but not node version 10)."
+		echo "Please update your node with version 8.11.3 or greater (but not version 10)."
 		exit 1
 	fi
 }
