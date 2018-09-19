@@ -25,7 +25,7 @@ function check_node_version {
 	local return_=0	
 	# set to 0 if not found
 	local version=`node -v`
-	if [ $(version_formatter $version) -ge $(version_formatter "9.0.0") ]; then
+	if [ $(version_formatter $version) -le $(version_formatter "8.0.0") ]; then
 		return_=1
 	fi
 	# return value
@@ -36,13 +36,13 @@ function check_dependencies {
 	# check if node is installed
 	local chck_node=$(node_is_installed)
 	if [ $chck_node -ne 0 ]; then
-		echo "Please install node with version 8.11.3 or lesser."
+		echo "Please install node with version 8.11.3 or greater (but not node version 10)."
 		exit 1
 	fi
         
 	local chck_node_v=$(check_node_version)
 	if [ $chck_node_v -ne 0 ]; then
-		echo "Please update your node with version 8.11.3 or lesser."
+		echo "Please update your node with version 8.11.3 or greater (but not node version 10)."
 		exit 1
 	fi
 }
@@ -69,9 +69,11 @@ function copy_env {
 }
 
 function main {
-	install_cli
 	set -e
 	check_dependencies
+	set +e
+	install_cli
+	set -e
 	create_resources
 	#copy_env
 	set +e

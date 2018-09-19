@@ -70,9 +70,9 @@ GOTO:EOF
 GOTO:EOF
 
 :check_node_version
-    node -v >tmp.txt
+    node -v > tmp.txt
     set /p NODE_VER=<tmp.txt
-    call  :compare_installed_versions 8.11.3 %NODE_VER%
+    call  :compare_installed_versions 8.0.0 %NODE_VER%
     if %errorlevel% == 1 set `%~1=1`
     if %errorlevel% == -1 set set `%~1=-1`
 
