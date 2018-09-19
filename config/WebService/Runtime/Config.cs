@@ -23,6 +23,7 @@ namespace Microsoft.Azure.IoTSolutions.UIConfig.WebService.Runtime
     {
         private const string APPLICATION_KEY = "ConfigService:";
         private const string PORT_KEY = APPLICATION_KEY + "webservice_port";
+        private const string SOLUTION_TYPE_KEY = APPLICATION_KEY + "solutionType";
         private const string SEED_TEMPLATE_KEY = APPLICATION_KEY + "seedTemplate";
         private const string AZURE_MAPS_KEY = APPLICATION_KEY + "azuremaps_key";
 
@@ -61,6 +62,7 @@ namespace Microsoft.Azure.IoTSolutions.UIConfig.WebService.Runtime
                 StorageAdapterApiUrl = configData.GetString(STORAGE_ADAPTER_URL_KEY),
                 DeviceSimulationApiUrl = configData.GetString(DEVICE_SIMULATION_URL_KEY),
                 TelemetryApiUrl = configData.GetString(TELEMETRY_URL_KEY),
+                SolutionType = configData.GetString(SOLUTION_TYPE_KEY),
                 SeedTemplate = configData.GetString(SEED_TEMPLATE_KEY),
                 AzureMapsKey = configData.GetString(AZURE_MAPS_KEY),
                 UserManagementApiUrl = configData.GetString(USER_MANAGEMENT_URL_KEY)
