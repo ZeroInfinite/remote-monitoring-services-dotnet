@@ -9,6 +9,10 @@ using Microsoft.Azure.IoTSolutions.AsaManager.WebService.v1.Models;
 
 namespace Microsoft.Azure.IoTSolutions.AsaManager.WebService.v1.Controllers
 {
+    /*
+     * StatusController is not accessible on deployed services because it is an internal service running in
+     * the background. The below status API responds only on local machine. 
+     */
     [Route(Version.PATH + "/[controller]"), ExceptionsFilter]
     public sealed class StatusController : Controller
     {

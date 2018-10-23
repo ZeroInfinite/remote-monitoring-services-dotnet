@@ -49,33 +49,42 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
             var statusIsOk = true;
             var statusMsg = "Alive and well";
             var errors = new List<string>();
+            var explorerUrl = string.Empty;
+            StatusModel storageAdapterStatusModel = new StatusModel();
+            StatusModel cosmosDbStatusModel = new StatusModel();
+            StatusModel timeSeriesStatusModel = new StatusModel();
 
             // Check access to Storage Adapter
             var storageAdapterStatus = await this.storageAdapter.PingAsync();
             if (!storageAdapterStatus.Item1)
             {
                 statusIsOk = false;
-                errors.Add("Unable to use key value storage");
+                var message = "Unable to connect to Storage Adapter service";
+                errors.Add(message);
+                storageAdapterStatusModel.Message = message;
+                storageAdapterStatusModel.IsConnected = false;
+            }
+            else
+            {
+                storageAdapterStatusModel.Message = storageAdapterStatus.Item2;
+                storageAdapterStatusModel.IsConnected = false;
             }
 
             // Check connection to CosmosDb
             var cosmosDbStatus = this.cosmosDb.Ping();
             if (!cosmosDbStatus.Item1)
             {
+                var message = "Unable to use storage";
                 statusIsOk = false;
-                errors.Add("Unable to use storage");
+                errors.Add(message);
+                cosmosDbStatusModel.Message = message;
+                cosmosDbStatusModel.IsConnected = false;
             }
-
-            // Prepare status message
-            if (!statusIsOk)
+            else
             {
-                statusMsg = string.Join(";", errors);
+                cosmosDbStatusModel.Message = cosmosDbStatus.Item2;
+                cosmosDbStatusModel.IsConnected = true;
             }
-
-            // Prepare response
-            var result = new StatusApiModel(statusIsOk, statusMsg);
-            result.Dependencies.Add("Key Value Storage", storageAdapterStatus.Item2);
-            result.Dependencies.Add("Storage", cosmosDbStatus.Item2);
 
             // Add Time Series Dependencies if needed
             if (this.config.ServicesConfig.StorageType.Equals(
@@ -86,22 +95,46 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
                 var timeSeriesStatus = await this.timeSeriesClient.PingAsync();
                 if (!timeSeriesStatus.Item1)
                 {
+                    var message = "Unable to use Time Series Insights";
                     statusIsOk = false;
-                    errors.Add("Unable to use Time Series Insights");
+                    errors.Add(message);
+                    timeSeriesStatusModel.Message = message;
+                    timeSeriesStatusModel.IsConnected = false;
                 }
-                result.Dependencies.Add("TimeSeries", timeSeriesStatus.Item2);
-
+                else
+                {
+                    timeSeriesStatusModel.Message = timeSeriesStatus.Item2;
+                    timeSeriesStatusModel.IsConnected = true;
+                }
                 // Add Time Series Insights explorer url
                 var timeSeriesFqdn = this.config.ServicesConfig.TimeSeriesFqdn;
                 var environmentId = timeSeriesFqdn.Substring(0, timeSeriesFqdn.IndexOf(TIME_SERIES_EXPLORER_URL_SEPARATOR_CHAR));
-                var explorerUrl = this.config.ServicesConfig.TimeSeriesExplorerUrl +
+                explorerUrl = this.config.ServicesConfig.TimeSeriesExplorerUrl +
                     "?environmentId=" + environmentId +
                     "&tid=" + this.config.ServicesConfig.ActiveDirectoryTenant;
-                result.Properties.Add(TIME_SERIES_EXPLORER_URL_KEY, explorerUrl);
             }
+
+            // Prepare status message
+            if (!statusIsOk)
+            {
+                statusMsg = string.Join(";", errors);
+            }
+
+            // Prepare response
+            var result = new StatusApiModel(statusIsOk, statusMsg);
+            result.Dependencies.Add("StorageAdapter", storageAdapterStatusModel);
+            result.Dependencies.Add("Storage", cosmosDbStatusModel);
 
             result.Properties.Add(STORAGE_TYPE_KEY, this.config.ServicesConfig.StorageType);
 
+            // Add Time Series Dependencies if needed
+            if (this.config.ServicesConfig.StorageType.Equals(
+                TIME_SERIES_KEY,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                result.Dependencies.Add("TimeSeries", timeSeriesStatusModel);
+                result.Properties.Add(TIME_SERIES_EXPLORER_URL_KEY, explorerUrl);
+            }
             this.log.Info("Service status request", () => new { Healthy = statusIsOk, statusMsg });
 
             return result;
