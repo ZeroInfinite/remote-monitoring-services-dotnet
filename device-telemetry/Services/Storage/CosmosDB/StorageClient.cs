@@ -202,8 +202,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Storage.CosmosDB
             else
             {
                 return new Tuple<bool, string>(false,
-                    "Could not reach storage service. " +
-                    "Check connection string");
+                    "Could not reach storage service. Check connection string");
             }
         }
 

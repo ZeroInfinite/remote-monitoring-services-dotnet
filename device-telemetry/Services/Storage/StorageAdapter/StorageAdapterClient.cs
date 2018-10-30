@@ -59,7 +59,7 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.StorageAdapter
                 }
 
                 var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
-                if (data["Status"].ToString().StartsWith("OK:"))
+                if (Convert.ToBoolean(data["IsConnected"]).Equals(true))
                 {
                     return new Tuple<bool, string>(true, data["Status"].ToString());
                 }

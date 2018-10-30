@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Azure.IoTSolutions.AsaManager.WebService.Runtime;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Microsoft.Azure.IoTSolutions.AsaManager.WebService.v1.Models
 {
@@ -12,10 +13,14 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.WebService.v1.Models
         private const string DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:sszzz";
 
         [JsonProperty(PropertyName = "Name", Order = 10)]
-        public string Name => "AsaManager";
+        public string Name => "ASAManager";
 
+        [JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty(PropertyName = "Status", Order = 20)]
-        public string Status { get; set; }
+        public StatusType Status { get; set; }
+
+        [JsonProperty(PropertyName = "Message", Order = 25)]
+        public string Message { get; set; }
 
         [JsonProperty(PropertyName = "CurrentTime", Order = 30)]
         public string CurrentTime => DateTimeOffset.UtcNow.ToString(DATE_FORMAT);
@@ -40,22 +45,13 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.WebService.v1.Models
 
         /// <summary>A property bag with details about the internal dependencies</summary>
         [JsonProperty(PropertyName = "Dependencies", Order = 80)]
-        public Dictionary<string, string> Dependencies = new Dictionary<string, string>();
+        public Dictionary<string, StatusModel> Dependencies = new Dictionary<string, StatusModel>();
 
         [JsonProperty(PropertyName = "$metadata", Order = 1000)]
-        public Dictionary<string, string> Metadata = new Dictionary<string, string>
+        public Dictionary<string, string> Metadata => new Dictionary<string, string>
         {
             { "$type", "Status;" + Version.NUMBER },
             { "$uri", "/" + Version.PATH + "/status" }
         };
-
-        public void SetStatus(bool isOk, string msg)
-        {
-            this.Status = isOk ? "OK" : "ERROR";
-            if (!string.IsNullOrEmpty(msg))
-            {
-                this.Status += ":" + msg;
-            }
-        }
     }
 }

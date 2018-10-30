@@ -2,12 +2,13 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Azure.IoTSolutions.IotHubManager.WebService.v1.Models;
 using Microsoft.Azure.IoTSolutions.IotHubManager.WebService.Runtime;
 using Newtonsoft.Json;
 
 namespace Microsoft.Azure.IoTSolutions.IotHubManager.WebService.v1.Models
 {
-    public class StatusApiModel
+    public sealed class StatusApiModel
     {
         private const string DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:sszzz";
 
@@ -16,6 +17,9 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.WebService.v1.Models
 
         [JsonProperty(PropertyName = "Status", Order = 20)]
         public string Status { get; set; }
+
+        [JsonProperty(PropertyName = "IsConnected", Order = 25)]
+        public bool IsConnected { get; set; }
 
         [JsonProperty(PropertyName = "CurrentTime", Order = 30)]
         public string CurrentTime => DateTimeOffset.UtcNow.ToString(DATE_FORMAT);
@@ -36,17 +40,11 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.WebService.v1.Models
 
         /// <summary>A property bag with details about the service</summary>
         [JsonProperty(PropertyName = "Properties", Order = 70)]
-        public Dictionary<string, string> Properties => new Dictionary<string, string>
-        {
-            { "Foo", "Bar" }
-        };
+        public Dictionary<string, string> Properties = new Dictionary<string, string>();
 
         /// <summary>A property bag with details about the internal dependencies</summary>
         [JsonProperty(PropertyName = "Dependencies", Order = 80)]
-        public Dictionary<string, string> Dependencies => new Dictionary<string, string>
-        {
-            { "IoTHub", "OK:...msg..." }
-        };
+        public Dictionary<string, StatusModel> Dependencies = new Dictionary<string, StatusModel>();
 
         [JsonProperty(PropertyName = "$metadata", Order = 1000)]
         public Dictionary<string, string> Metadata => new Dictionary<string, string>
@@ -57,6 +55,7 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.WebService.v1.Models
 
         public StatusApiModel(bool isOk, string msg)
         {
+            this.IsConnected = isOk ? true : false;
             this.Status = isOk ? "OK" : "ERROR";
             if (!string.IsNullOrEmpty(msg))
             {

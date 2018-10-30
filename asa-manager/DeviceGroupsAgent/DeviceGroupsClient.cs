@@ -10,6 +10,7 @@ using Microsoft.Azure.IoTSolutions.AsaManager.Services.Diagnostics;
 using Microsoft.Azure.IoTSolutions.AsaManager.Services.Exceptions;
 using Microsoft.Azure.IoTSolutions.AsaManager.Services.Http;
 using Microsoft.Azure.IoTSolutions.AsaManager.Services.Runtime;
+using Newtonsoft.Json;
 
 namespace Microsoft.Azure.IoTSolutions.AsaManager.DeviceGroupsAgent
 {
@@ -17,6 +18,7 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.DeviceGroupsAgent
     {
         Task<Dictionary<string, IEnumerable<string>>> GetGroupToDevicesMappingAsync(DeviceGroupListApiModel deviceGroupList);
         Task<DeviceGroupListApiModel> GetDeviceGroupsAsync();
+        Task<Tuple<string, string>> PingAsync();
     }
 
     public class DeviceGroupsClient : IDeviceGroupsClient
@@ -41,6 +43,41 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.DeviceGroupsAgent
             this.baseUrl = $"{servicesConfig.ConfigServiceUrl}/devicegroups";
             this.servicesConfig = servicesConfig;
             this.thread = thread;
+        }
+
+        // Ping config service for status check
+        public async Task<Tuple<string, string>> PingAsync()
+        {
+            var status = "NotRunning";
+            var message = "";
+            var request = new HttpRequest();
+            request.SetUriFromString($"{this.servicesConfig.ConfigServiceUrl}/status");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Cache-Control", "no-cache");
+            request.Headers.Add("User-Agent", "ASA Manager");
+
+            try
+            {
+                var response = await this.httpClient.GetAsync(request);
+                if (response.IsError)
+                {
+                    message = "Status code: " + response.StatusCode;
+                }
+                else
+                {
+                    var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
+                    message = data["Message"].ToString();
+                    status = data["Status"].ToString();
+                }
+            }
+            catch (Exception e)
+            {
+                var msg = "Config service check failed";
+                this.logger.Error(msg, () => new { e });
+                message = e.Message;
+            }
+
+            return new Tuple<string, string>(status, message);
         }
 
         /**

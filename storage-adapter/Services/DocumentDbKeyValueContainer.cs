@@ -47,6 +47,27 @@ namespace Microsoft.Azure.IoTSolutions.StorageAdapter.Services
             this.docDbOptions = this.GetDocDbOptions();
         }
 
+        public Tuple<bool, string> Ping()
+        {
+            Uri response = null;
+
+            if (this.client != null)
+            {
+                // make generic call to see if storage client can be reached
+                response = this.client.ReadEndpoint;
+            }
+
+            if (response != null)
+            {
+                return new Tuple<bool, string>(true, "OK: Alive and well");
+            }
+            else
+            {
+                return new Tuple<bool, string>(false,
+                    "Could not reach storage service. Check connection string");
+            }
+        }
+
         public async Task<ValueServiceModel> GetAsync(string collectionId, string key)
         {
             await this.SetupStorageAsync();

@@ -22,6 +22,8 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.Services
             DevicePropertyServiceModel devicePropertyServiceModel);
 
         Task<bool> TryRecreateListAsync(bool force = false);
+
+        DateTime GetDevicePropertiesCacheLastUpdated();
     }
 
     /// <summary>  
@@ -52,6 +54,8 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.Services
         private const string TAG_PREFIX = "Tags.";
         private const string REPORTED_PREFIX = "Properties.Reported.";
 
+        private DateTime DevicePropertiesLastUpdated;
+
         /// <summary>
         /// The constructor.
         /// </summary>
@@ -66,6 +70,11 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.Services
             this.ttl = config.DevicePropertiesTTL;
             this.rebuildTimeout = config.DevicePropertiesRebuildTimeout;
             this.devices = devices;
+        }
+
+        public DateTime GetDevicePropertiesCacheLastUpdated()
+        {
+            return this.DevicePropertiesLastUpdated;
         }
 
         /// <summary>
@@ -171,6 +180,7 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.Services
                         });
                     if (updated)
                     {
+                        this.DevicePropertiesLastUpdated = DateTime.Now;
                         return true;
                     }
                 }

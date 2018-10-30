@@ -15,7 +15,10 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Models
         public string Name => "Telemetry";
 
         [JsonProperty(PropertyName = "Status", Order = 20)]
-        public StatusModel Status { get; set; }
+        public string Status { get; set; }
+
+        [JsonProperty(PropertyName = "IsConnected", Order = 25)]
+        public bool IsConnected { get; set; }
 
         [JsonProperty(PropertyName = "CurrentTime", Order = 30)]
         public string CurrentTime => DateTimeOffset.UtcNow.ToString(DATE_FORMAT);
@@ -51,12 +54,11 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Models
 
         public StatusApiModel(bool isOk, string msg)
         {
-            this.Status = new StatusModel();
-            this.Status.IsConnected = isOk ? true : false;
-            this.Status.Message = isOk ? "OK" : "ERROR";
+            this.IsConnected = isOk ? true : false;
+            this.Status = isOk ? "OK" : "ERROR";
             if (!string.IsNullOrEmpty(msg))
             {
-                this.Status.Message += ":" + msg;
+                this.Status += ":" + msg;
             }
         }
     }

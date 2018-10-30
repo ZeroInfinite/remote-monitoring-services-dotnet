@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -15,6 +16,7 @@ namespace Microsoft.Azure.IoTSolutions.UIConfig.Services.External
     public interface IUserManagementClient
     {
         Task<IEnumerable<string>> GetAllowedActionsAsync(string userObjectId, IEnumerable<string> roles);
+        Task<Tuple<bool, string>> PingAsync();
     }
 
     public class UserManagementClient : IUserManagementClient
@@ -22,12 +24,18 @@ namespace Microsoft.Azure.IoTSolutions.UIConfig.Services.External
         private readonly IHttpClient httpClient;
         private readonly ILogger log;
         private readonly string serviceUri;
+        private readonly IHttpClient statusClient;
 
-        public UserManagementClient(IHttpClient httpClient, IServicesConfig config, ILogger logger)
+        public UserManagementClient(
+            IHttpClient httpClient, 
+            IServicesConfig config, 
+            ILogger logger,
+            IHttpClient statusClient)
         {
             this.httpClient = httpClient;
             this.log = logger;
             this.serviceUri = config.UserManagementApiUrl;
+            this.statusClient = statusClient;
         }
 
         public async Task<IEnumerable<string>> GetAllowedActionsAsync(string userObjectId, IEnumerable<string> roles)
@@ -76,6 +84,37 @@ namespace Microsoft.Azure.IoTSolutions.UIConfig.Services.External
                     throw new ResourceNotFoundException($"{response.Content}, request URL = {request.Uri}");
                 default:
                     throw new HttpRequestException($"Http request failed, status code = {response.StatusCode}, content = {response.Content}, request URL = {request.Uri}");
+            }
+        }
+
+        public async Task<Tuple<bool, string>> PingAsync()
+        {
+            var request = new HttpRequest();
+            request.SetUriFromString($"{this.serviceUri}/status");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Cache-Control", "no-cache");
+            request.Headers.Add("User-Agent", "Config");
+
+            try
+            {
+                IHttpResponse response = await this.statusClient.GetAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new Tuple<bool, string>(false, "Status code: " + response.StatusCode);
+                }
+
+                var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
+                if (Convert.ToBoolean(data["IsConnected"]).Equals(true))
+                {
+                    return new Tuple<bool, string>(true, data["Status"].ToString());
+                }
+
+                return new Tuple<bool, string>(false, data["Status"].ToString());
+            }
+            catch (Exception e)
+            {
+                return new Tuple<bool, string>(false, e.Message);
             }
         }
     }

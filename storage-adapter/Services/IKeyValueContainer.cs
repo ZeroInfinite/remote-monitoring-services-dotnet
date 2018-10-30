@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.IoTSolutions.StorageAdapter.Services.Models;
@@ -51,5 +52,10 @@ namespace Microsoft.Azure.IoTSolutions.StorageAdapter.Services
         /// <param name="key">Key</param>
         /// <returns></returns>
         Task DeleteAsync(string collectionId, string key);
+
+        /// <summary>
+        /// Ping DB
+        /// </summary>
+        Tuple<bool, string> Ping();
     }
 }

@@ -19,6 +19,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.External
         Task LogEventAsync(string eventName);
 
         Task LogEventAsync(string eventName, Dictionary<string, object> eventProperties);
+
+        Task<Tuple<bool, string>> PingAsync();
     }
 
     public class DiagnosticsClient : IDiagnosticsClient
@@ -39,14 +41,14 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.External
             this.maxRetries = config.DiagnosticsMaxLogRetries;
             if (string.IsNullOrEmpty(this.serviceUrl))
             {
-                this.log.Error("Cannot log to diagnostics service, diagnostics url not provided", () => {});
+                this.log.Error("Cannot log to diagnostics service, diagnostics url not provided", () => { });
                 this.CanLogToDiagnostics = false;
             }
             else
             {
                 this.CanLogToDiagnostics = true;
             }
-    }
+        }
 
         /**
          * Logs event with given event name and empty event properties
@@ -120,6 +122,34 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.External
             else
             {
                 this.log.Error("Failed to log to diagnostics, reached max retries and will not log", () => new { errorMessage });
+            }
+        }
+
+        public async Task<Tuple<bool, string>> PingAsync()
+        {
+            var request = new HttpRequest();
+            try
+            {
+                request.SetUriFromString($"{this.serviceUrl}/status");
+                var response = await this.httpClient.GetAsync(request);
+
+                if (response.IsError)
+                {
+                    return new Tuple<bool, string>(false, "Status code: " + response.StatusCode);
+                }
+
+                var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
+                if (Convert.ToBoolean(data["IsConnected"]).Equals(true))
+                {
+                    return new Tuple<bool, string>(true, data["Status"].ToString());
+                }
+
+                return new Tuple<bool, string>(false, data["Status"].ToString());
+            }
+            catch (Exception e)
+            {
+                this.log.Error("Storage adapter check failed", () => new { e });
+                return new Tuple<bool, string>(false, e.Message);
             }
         }
     }

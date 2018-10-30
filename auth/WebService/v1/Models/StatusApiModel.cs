@@ -17,6 +17,9 @@ namespace Microsoft.Azure.IoTSolutions.Auth.WebService.v1.Models
         [JsonProperty(PropertyName = "Status", Order = 20)]
         public string Status { get; set; }
 
+        [JsonProperty(PropertyName = "IsConnected", Order = 25)]
+        public bool IsConnected { get; set; }
+
         [JsonProperty(PropertyName = "CurrentTime", Order = 30)]
         public string CurrentTime => DateTimeOffset.UtcNow.ToString(DATE_FORMAT);
 
@@ -55,6 +58,7 @@ namespace Microsoft.Azure.IoTSolutions.Auth.WebService.v1.Models
 
         public StatusApiModel(bool isOk, string msg)
         {
+            this.IsConnected = isOk ? true : false;
             this.Status = isOk ? "OK" : "ERROR";
             if (!string.IsNullOrEmpty(msg))
             {

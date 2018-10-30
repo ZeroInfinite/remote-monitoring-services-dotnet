@@ -2,10 +2,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Diagnostics;
+using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.External;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Storage.CosmosDB;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.Storage.TimeSeries;
 using Microsoft.Azure.IoTSolutions.DeviceTelemetry.Services.StorageAdapter;
@@ -22,6 +22,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
         private readonly IStorageAdapterClient storageAdapter;
         private readonly IStorageClient cosmosDb;
         private readonly ITimeSeriesClient timeSeriesClient;
+        private readonly IUserManagementClient userManagementClient;
+        private readonly IDiagnosticsClient diagnosticsClient;
         private readonly ILogger log;
 
         private const string STORAGE_TYPE_KEY = "StorageType";
@@ -34,12 +36,16 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
             IStorageClient cosmosDb,
             IStorageAdapterClient storageAdapter,
             ITimeSeriesClient timeSeriesClient,
+            IUserManagementClient userManagementClient,
+            IDiagnosticsClient diagnosticsClient,
             ILogger logger)
         {
             this.config = config;
             this.cosmosDb = cosmosDb;
             this.storageAdapter = storageAdapter;
             this.timeSeriesClient = timeSeriesClient;
+            this.userManagementClient = userManagementClient;
+            this.diagnosticsClient = diagnosticsClient;
             this.log = logger;
         }
 
@@ -53,6 +59,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
             StatusModel storageAdapterStatusModel = new StatusModel();
             StatusModel cosmosDbStatusModel = new StatusModel();
             StatusModel timeSeriesStatusModel = new StatusModel();
+            StatusModel authStatusModel = new StatusModel();
+            StatusModel diagnosticsStatusModel = new StatusModel();
 
             // Check access to Storage Adapter
             var storageAdapterStatus = await this.storageAdapter.PingAsync();
@@ -67,7 +75,39 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
             else
             {
                 storageAdapterStatusModel.Message = storageAdapterStatus.Item2;
-                storageAdapterStatusModel.IsConnected = false;
+                storageAdapterStatusModel.IsConnected = true;
+            }
+
+            if (this.config.ClientAuthConfig.AuthRequired)
+            {
+                // Check access to Auth
+                var authStatus = await this.userManagementClient.PingAsync();
+                if (!authStatus.Item1)
+                {
+                    statusIsOk = false;
+                    var message = "Unable to connect to Auth service";
+                    errors.Add(message);
+                    authStatusModel.Message = message;
+                    authStatusModel.IsConnected = false;
+                }
+                else
+                {
+                    authStatusModel.Message = storageAdapterStatus.Item2;
+                    authStatusModel.IsConnected = true;
+                }
+            }
+
+            // Check access to diagnostics
+            var diagnosticsStatus = await this.diagnosticsClient.PingAsync();
+            if (!diagnosticsStatus.Item1)
+            {
+                authStatusModel.Message = "Unable to connect to Auth service";
+                authStatusModel.IsConnected = false;
+            }
+            else
+            {
+                authStatusModel.Message = storageAdapterStatus.Item2;
+                authStatusModel.IsConnected = true;
             }
 
             // Check connection to CosmosDb
@@ -124,6 +164,8 @@ namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Controllers
             var result = new StatusApiModel(statusIsOk, statusMsg);
             result.Dependencies.Add("StorageAdapter", storageAdapterStatusModel);
             result.Dependencies.Add("Storage", cosmosDbStatusModel);
+            result.Dependencies.Add("Auth", authStatusModel);
+            result.Dependencies.Add("Diagnostics", diagnosticsStatusModel);
 
             result.Properties.Add(STORAGE_TYPE_KEY, this.config.ServicesConfig.StorageType);
 

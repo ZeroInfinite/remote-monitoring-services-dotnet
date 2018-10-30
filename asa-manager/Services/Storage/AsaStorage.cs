@@ -12,6 +12,7 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.Services.Storage
     {
         void Initialize(AsaOutputStorageType outputStorageType, CosmosDbTableConfiguration config);
         Task SetupOutputStorageAsync();
+        Task<Tuple<string, string>> PingAsync();
     }
 
     public class AsaStorage : IAsaStorage
@@ -70,6 +71,34 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.Services.Storage
             }
 
             throw new NotImplementedException();
+        }
+
+        public async Task<Tuple<string, string>> PingAsync()
+        {
+            var status = "NotRunning";
+            var message = "";
+
+            try
+            {
+                if (this.storageType == AsaOutputStorageType.CosmosDbSql)
+                {
+                    var storage = this.factory.Resolve<ICosmosDbSql>().Initialize(this.cosmosDbConfig);
+                    await storage.CreateDatabaseAndCollectionsIfNotExistAsync();
+                    status = "Running";
+                    message = "Database and collection exist in CosmosDB";
+                }
+                else if (this.storageType == AsaOutputStorageType.TimeSeriesInsights)
+                {
+                    status = "Disabled";
+                    message = "StorageType is TimeSeriesInsights";
+                }
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+            }
+
+            return new Tuple<string, string>(status, message);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +20,9 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.Services
 
         // Compare two list of rules
         bool RulesAreEquivalent(IList<RuleApiModel> newRules, IList<RuleApiModel> rules);
+
+        // Ping Device Telemetry Service
+        Task<Tuple<string, string>> PingAsync();
     }
 
     public class Rules : IRules
@@ -37,6 +41,41 @@ namespace Microsoft.Azure.IoTSolutions.AsaManager.Services
             this.httpClient = httpClient;
             this.rulesWebServiceUrl = config.RulesWebServiceUrl;
             this.rulesWebServiceTimeout = config.RulesWebServiceTimeout;
+        }
+
+        // Ping DevioceTelemetry service for status check
+        public async Task<Tuple<string, string>> PingAsync()
+        {
+            var status = "NotRunning";
+            var message = "";
+            var request = new HttpRequest();
+            request.SetUriFromString($"{this.rulesWebServiceUrl}/status");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Cache-Control", "no-cache");
+            request.Headers.Add("User-Agent", "ASA Manager");
+
+            try
+            {
+                var response = await this.httpClient.GetAsync(request);
+                if (response.IsError)
+                {
+                    message = "Status code: " + response.StatusCode;
+                }
+                else
+                {
+                    var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
+                    message = data["Message"].ToString();
+                    status = data["Status"].ToString();
+                }
+            }
+            catch (Exception e)
+            {
+                var msg = "Telemetry service check failed";
+                this.log.Error(msg, () => new { e });
+                message = e.Message;
+            }
+
+            return new Tuple<string, string>(status, message);
         }
 
         public async Task<IList<RuleApiModel>> GetActiveRulesSortedByIdAsync()

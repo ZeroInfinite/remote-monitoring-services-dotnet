@@ -35,7 +35,8 @@ namespace Services.Test
                 {
                     UserManagementApiUrl = MOCK_SERVICE_URI
                 },
-                new Logger("UnitTest", LogLevel.Debug));
+                new Logger("UnitTest", LogLevel.Debug),
+                mockHttpClient.Object);
             this.rand = new Random();
         }
 

@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -44,6 +46,32 @@ namespace Microsoft.Azure.IoTSolutions.IotHubManager.Services.External
             this.CheckStatusCode(response, request);
 
             return JsonConvert.DeserializeObject<ValueApiModel>(response.Content);
+        }
+
+        public async Task<Tuple<bool, string>> PingAsync()
+        {
+            try
+            {
+                var response = await this.httpClient.GetAsync(this.CreateRequest($"status"));
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new Tuple<bool, string>(false, "Status code: " + response.StatusCode);
+                }
+
+                var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
+                if (Convert.ToBoolean(data["IsConnected"]).Equals(true))
+                {
+                    return new Tuple<bool, string>(true, data["Status"].ToString());
+                }
+
+                return new Tuple<bool, string>(false, data["Status"].ToString());
+            }
+            catch (Exception e)
+            {
+                this.log.Error("Storage adapter check failed", () => new { e });
+                return new Tuple<bool, string>(false, e.Message);
+            }
         }
 
         private HttpRequest CreateRequest(string path, ValueApiModel content = null)

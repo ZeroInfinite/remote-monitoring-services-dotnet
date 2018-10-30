@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 using System;
 
-namespace Microsoft.Azure.IoTSolutions.DeviceTelemetry.WebService.v1.Models
+namespace Microsoft.Azure.IoTSolutions.IotHubManager.WebService.v1.Models
 {
     public class StatusModel
     {
